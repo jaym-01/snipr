@@ -2,8 +2,9 @@
 :root {
   --primary: #F1EFEB;
   --secondary: #333333;
+  --sec-trans: #C1BFBC;
 
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -18,16 +19,72 @@
   -webkit-text-size-adjust: 100%;
 }
 
+#root, body, html {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  left: 0;
+}
+
 .container {
   margin: 0;
-  padding-top: 10vh;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
 }
 
-.file-in{
-  width: 100% !important;
-  height: 100% !important;
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.title-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 25px;
+}
+
+.title {
+  color: var(--secondary);
+}
+
+.title-proc {
+  color: var(--sec-trans);
+}
+
+.control-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 10px;
+}
+
+.cancel {
+  background-color: var(--secondary);
+  color: var(--primary);
+  border: none;
+  border-radius: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  --size: 38px;
+  width: var(--size);
+  height: var(--size);
+  cursor: pointer;
+}
+
+.cancel:hover {
+  opacity: 0.9;
 }

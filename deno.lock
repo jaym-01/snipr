@@ -3,10 +3,12 @@
   "specifiers": {
     "npm:@tauri-apps/api@2": "2.4.0",
     "npm:@tauri-apps/cli@2": "2.4.0",
+    "npm:@tauri-apps/plugin-dialog@2.2": "2.2.0",
     "npm:@tauri-apps/plugin-opener@2": "2.2.6",
     "npm:@types/react-dom@^18.3.1": "18.3.5_@types+react@18.3.20",
     "npm:@types/react@^18.3.1": "18.3.20",
     "npm:@vitejs/plugin-react@^4.3.4": "4.3.4_vite@6.2.3_@babel+core@7.26.10",
+    "npm:lucide-react@0.483": "0.483.0_react@18.3.1",
     "npm:react-dom@^18.3.1": "18.3.1_react@18.3.1",
     "npm:react@^18.3.1": "18.3.1",
     "npm:typescript@~5.6.2": "5.6.3",
@@ -364,6 +366,12 @@
         "@tauri-apps/cli-win32-x64-msvc"
       ]
     },
+    "@tauri-apps/plugin-dialog@2.2.0": {
+      "integrity": "sha512-6bLkYK68zyK31418AK5fNccCdVuRnNpbxquCl8IqgFByOgWFivbiIlvb79wpSXi0O+8k8RCSsIpOquebusRVSg==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@tauri-apps/plugin-opener@2.2.6": {
       "integrity": "sha512-bSdkuP71ZQRepPOn8BOEdBKYJQvl6+jb160QtJX/i2H9BF6ZySY/kYljh76N2Ne5fJMQRge7rlKoStYQY5Jq1w==",
       "dependencies": [
@@ -519,6 +527,12 @@
         "yallist"
       ]
     },
+    "lucide-react@0.483.0_react@18.3.1": {
+      "integrity": "sha512-WldsY17Qb/T3VZdMnVQ9C3DDIP7h1ViDTHVdVGnLZcvHNg30zH/MTQ04RTORjexoGmpsXroiQXZ4QyR0kBy0FA==",
+      "dependencies": [
+        "react"
+      ]
+    },
     "ms@2.1.3": {
       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
     },
@@ -624,10 +638,12 @@
       "dependencies": [
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
+        "npm:@tauri-apps/plugin-dialog@2.2",
         "npm:@tauri-apps/plugin-opener@2",
         "npm:@types/react-dom@^18.3.1",
         "npm:@types/react@^18.3.1",
         "npm:@vitejs/plugin-react@^4.3.4",
+        "npm:lucide-react@0.483",
         "npm:react-dom@^18.3.1",
         "npm:react@^18.3.1",
         "npm:typescript@~5.6.2",
