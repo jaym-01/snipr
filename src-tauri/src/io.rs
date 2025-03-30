@@ -1,9 +1,25 @@
-use crate::models;
+use crate::models::{self, AppState};
 use std::fs::{remove_file, File};
 use std::io::{BufWriter, Write};
+use std::path::Path;
 use std::process::{Command, Stdio};
 
-pub fn decode(input_file: &str) -> Result<models::AudioData, std::io::Error> {
+pub const TMP_PCM_PATH: &str = "temp.pcm";
+
+pub fn cancel_cleanup() {
+    if Path::new(TMP_PCM_PATH).exists() {
+        std::fs::remove_file(TMP_PCM_PATH).unwrap();
+    }
+}
+
+pub fn decode(state: &AppState<'_>, input_file: &str) -> Result<models::AudioData, std::io::Error> {
+    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+        cancel_cleanup();
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Operation cancelled",
+        ));
+    }
     // get meta data - the channels + sample rate
     let output = Command::new("ffprobe")
         .arg("-v")
@@ -16,6 +32,14 @@ pub fn decode(input_file: &str) -> Result<models::AudioData, std::io::Error> {
         .stdout(Stdio::piped()) // Capture stdout
         .stderr(Stdio::null()) // Ignore stderr
         .output()?;
+
+    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+        cancel_cleanup();
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Operation cancelled",
+        ));
+    }
 
     let output_str = String::from_utf8_lossy(&output.stdout);
 
@@ -39,12 +63,36 @@ pub fn decode(input_file: &str) -> Result<models::AudioData, std::io::Error> {
         .parse::<u32>()
         .unwrap();
 
+    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+        cancel_cleanup();
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Operation cancelled",
+        ));
+    }
+
     // extract the audio samples from the data
     let ffmpeg_out = Command::new("ffmpeg")
         .args(&["-i", input_file, "-f", "s16le", "-acodec", "pcm_s16le", "-"])
         .output()?;
 
+    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+        cancel_cleanup();
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Operation cancelled",
+        ));
+    }
+
     let data = ffmpeg_out.stdout;
+
+    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+        cancel_cleanup();
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Operation cancelled",
+        ));
+    }
 
     Ok(models::AudioData {
         channels: channels,
@@ -53,10 +101,9 @@ pub fn decode(input_file: &str) -> Result<models::AudioData, std::io::Error> {
     })
 }
 
-pub fn encode(data: models::AudioData, path: &str) -> Result<(), std::io::Error> {
+pub fn encode(data: &models::AudioData, path: &str) -> Result<(), std::io::Error> {
     // Create a temporary file to store PCM data
-    let tmp_pcm_path = "temp.pcm";
-    let pcm_file = File::create(tmp_pcm_path)?;
+    let pcm_file = File::create(TMP_PCM_PATH)?;
     let mut writer = BufWriter::new(pcm_file);
 
     // Write the PCM data to the file
@@ -76,7 +123,7 @@ pub fn encode(data: models::AudioData, path: &str) -> Result<(), std::io::Error>
         .arg("-ac")
         .arg(data.channels.to_string())
         .arg("-i")
-        .arg(tmp_pcm_path)
+        .arg(TMP_PCM_PATH)
         .arg(path)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -84,9 +131,7 @@ pub fn encode(data: models::AudioData, path: &str) -> Result<(), std::io::Error>
 
     mp3_write.wait()?;
 
-    remove_file(tmp_pcm_path)?;
-
-    println!("MP3 file created successfully!");
+    remove_file(TMP_PCM_PATH)?;
 
     Ok(())
 }

@@ -52,6 +52,13 @@
   align-items: center;
   gap: 5px;
   padding: 25px;
+
+  cursor:pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.title-content-h:hover {
+  transform: scale(1.08);
 }
 
 .title {
@@ -83,8 +90,58 @@
   width: var(--size);
   height: var(--size);
   cursor: pointer;
+
+  transition: all 0.1s ease-in-out;
+}
+
+.save-h:hover {
+  opacity: 0.95;
+  transform: scale(1.03);
 }
 
 .cancel:hover {
   opacity: 0.9;
+  transform: scale(1.15);
+}
+
+.save {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  background-color: var(--secondary);
+  color: var(--primary);
+  border: none;
+  border-radius: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  --sides: 20px;
+  padding: 10px;
+  padding-left: var(--sides);
+  padding-right: var(--sides);
+  cursor: pointer;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: all 0.1s ease-in-out;
+}
+
+.spin {
+  animation-name: spin;
+  animation-duration: 1200ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+}
+
+@keyframes spin {
+  from {
+      transform:rotate(0deg);
+  }
+  to {
+      transform:rotate(360deg);
+  }
 }

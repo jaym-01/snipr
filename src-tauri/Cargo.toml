@@ -1,8 +1,8 @@
 [package]
 name = "snipr"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["jay"]
+version = "0.0.1"
+description = "Removes silences from mp3 files"
+authors = ["Jay"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

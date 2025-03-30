@@ -1,12 +1,14 @@
-use crate::models::{self, AudioData};
+use crate::io::cancel_cleanup;
+use crate::models::{self, AppState, AudioData};
 
 // TODO: add padding to cuts
 pub fn remove_silences(
+    state: &AppState<'_>,
     data: models::AudioData,
     min_sil: Option<f64>,
     padding: Option<f64>,
     threshold: Option<u16>,
-) -> models::AudioData {
+) -> Option<models::AudioData> {
     // min number of samples before it can be considered a silence
     // take into account the 2 bytes for each sample and number of channels
     let buffer_size =
@@ -64,11 +66,18 @@ pub fn remove_silences(
                 start = new_samples.len() as i64;
             }
         }
+
+        if i % 100 == 0 {
+            if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+                cancel_cleanup();
+                return Option::None;
+            }
+        }
     }
 
-    return AudioData {
+    return Option::Some(AudioData {
         channels: data.channels,
         sample_rate: data.sample_rate,
         data: new_samples,
-    };
+    });
 }
