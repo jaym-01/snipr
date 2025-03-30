@@ -83,9 +83,9 @@ function App() {
   return (
     <main className="container">
       <div className="main-wrapper">
-        <div className={`title-content ${state !== ScreenState.LOADING ? "title-content-h": ""}`}>
-        <Music className={state !== ScreenState.LOADING ? "title" : "title-proc"} />
-          <h2 className={state !== ScreenState.LOADING ? "title" : "title-proc"} onClick={state !== ScreenState.LOADING ? handleOpenFile: ()=>undefined}>Click here or drag to open file</h2>
+        <div className={`title-content ${state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title-content-h": ""}`}>
+        <Music className={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title" : "title-proc"} />
+          <h2 className={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title" : "title-proc"} onClick={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? handleOpenFile: ()=>undefined}>Click here or drag to open file</h2>
         </div>
         {state == ScreenState.LOADING && <Loader size={50} className="spin" />}
       </div>

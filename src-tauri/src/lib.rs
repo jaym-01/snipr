@@ -59,6 +59,7 @@ async fn save_file(state: models::AppState<'_>, file_dest: String) -> Result<(),
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .manage(models::CutState {
             cancelled: Arc::new(AtomicBool::new(false)),
             audio_data: Arc::new(Mutex::new(None)),
