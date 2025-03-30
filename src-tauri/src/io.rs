@@ -6,15 +6,19 @@ use std::process::{Command, Stdio};
 
 pub const TMP_PCM_PATH: &str = "temp.pcm";
 
-pub fn cancel_cleanup() {
+pub fn cancel_cleanup(state: &AppState<'_>) {
     if Path::new(TMP_PCM_PATH).exists() {
         std::fs::remove_file(TMP_PCM_PATH).unwrap();
     }
+
+    state
+        .cancelled
+        .store(false, std::sync::atomic::Ordering::Relaxed);
 }
 
 pub fn decode(state: &AppState<'_>, input_file: &str) -> Result<models::AudioData, std::io::Error> {
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup();
+        cancel_cleanup(state);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "Operation cancelled",
@@ -34,7 +38,7 @@ pub fn decode(state: &AppState<'_>, input_file: &str) -> Result<models::AudioDat
         .output()?;
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup();
+        cancel_cleanup(state);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "Operation cancelled",
@@ -64,7 +68,7 @@ pub fn decode(state: &AppState<'_>, input_file: &str) -> Result<models::AudioDat
         .unwrap();
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup();
+        cancel_cleanup(state);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "Operation cancelled",
@@ -77,7 +81,7 @@ pub fn decode(state: &AppState<'_>, input_file: &str) -> Result<models::AudioDat
         .output()?;
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup();
+        cancel_cleanup(state);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "Operation cancelled",
@@ -87,7 +91,7 @@ pub fn decode(state: &AppState<'_>, input_file: &str) -> Result<models::AudioDat
     let data = ffmpeg_out.stdout;
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup();
+        cancel_cleanup(state);
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "Operation cancelled",

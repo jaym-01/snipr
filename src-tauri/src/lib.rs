@@ -10,22 +10,16 @@ use std::sync::{
 
 #[tauri::command]
 async fn cut_silences(state: models::AppState<'_>, file_dest: String) -> Result<(), String> {
-    println!("starting");
-    println!("starting cut_silences {}", file_dest);
-
     let app_state = &state;
     state.cancelled.store(false, Relaxed);
 
-    let audio_data = cut::remove_silences(
-        app_state,
-        decode(app_state, &file_dest).unwrap(),
-        None,
-        None,
-        None,
-    );
+    let decoded_data =
+        decode(app_state, &file_dest).map_err(|_| "Failed to decode file".to_string())?;
+
+    let audio_data = cut::remove_silences(app_state, decoded_data, None, None, None);
 
     if audio_data.is_none() {
-        return Err("Error while cutting silences".to_string());
+        return Err("Error while removing silences".to_string());
     } else {
         let mut l_audio_data = app_state.audio_data.lock().unwrap();
         *l_audio_data = audio_data;
@@ -36,17 +30,28 @@ async fn cut_silences(state: models::AppState<'_>, file_dest: String) -> Result<
 #[tauri::command]
 async fn cancel(state: models::AppState<'_>) -> Result<(), String> {
     state.cancelled.store(true, Relaxed);
+
+    let mut i = 0;
+
+    while state.cancelled.load(Relaxed) {
+        std::thread::sleep(std::time::Duration::from_millis(500));
+        i += 1;
+        if i > 10 {
+            return Err("Failed to stop process".to_string());
+        }
+    }
+
     Ok(())
 }
 
 #[tauri::command]
 async fn save_file(state: models::AppState<'_>, file_dest: String) -> Result<(), String> {
-    println!("starting save_file {}", file_dest);
     let l_audio_data = state.audio_data.lock().unwrap();
     if l_audio_data.is_none() {
-        Err("Error while saving file".to_string())
+        Err("No audio data to save".to_string())
     } else {
-        io::encode(l_audio_data.as_ref().unwrap(), &file_dest);
+        io::encode(l_audio_data.as_ref().unwrap(), &file_dest)
+            .map_err(|_| "Failed to saved file".to_string())?;
         Ok(())
     }
 }

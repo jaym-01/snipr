@@ -1,8 +1,8 @@
-
 :root {
-  --primary: #F1EFEB;
+  --primary: #f1efeb;
   --secondary: #333333;
-  --sec-trans: #C1BFBC;
+  --sec-trans: #c1bfbc;
+  --error: #d34242;
 
   font-family: "Poppins", sans-serif;
   font-size: 16px;
@@ -53,12 +53,12 @@
   gap: 5px;
   padding: 25px;
 
-  cursor:pointer;
   transition: all 0.15s ease-in-out;
 }
 
 .title-content-h:hover {
   transform: scale(1.08);
+  cursor: pointer;
 }
 
 .title {
@@ -89,7 +89,7 @@
   --size: 38px;
   width: var(--size);
   height: var(--size);
-  cursor: pointer;
+  /* cursor: pointer; */
 
   transition: all 0.1s ease-in-out;
 }
@@ -99,9 +99,10 @@
   transform: scale(1.03);
 }
 
-.cancel:hover {
+.cancel-h:hover {
   opacity: 0.9;
-  transform: scale(1.15);
+  transform: scale(1.13);
+  cursor: pointer;
 }
 
 .save {
@@ -139,9 +140,17 @@
 
 @keyframes spin {
   from {
-      transform:rotate(0deg);
+    transform: rotate(0deg);
   }
   to {
-      transform:rotate(360deg);
+    transform: rotate(360deg);
   }
+}
+
+.error {
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
 }

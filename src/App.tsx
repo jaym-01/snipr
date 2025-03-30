@@ -3,20 +3,47 @@ import { listen } from '@tauri-apps/api/event';
 import { Music, X, Loader } from 'lucide-react';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
-import { ScreenState } from "./states";
+import { ScreenState } from "./states.ts";
 import "./App.css";
 
 const extensionFilters = ["mp3", "wav", "flac"];
 
-function App() {
-  const [state, setState] = useState<ScreenState>(ScreenState.LOADING);
-  const [file, setFile] = useState<string | null>(null);
+function saveFile(){
+  return save({
+    filters: [{name: "Music", extensions: extensionFilters}]
+  });
+}
 
-  const runProcess = async function(file_: string) {
+function App() {
+  const [state, setState] = useState<ScreenState>(ScreenState.IDLE);
+  const [file, setFile] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [disableCancel, setDisableCancel] = useState(false);
+
+  const invokeSaveFile = async function(file_: string | null){
+    if(file_){
+      setState(ScreenState.SAVE_LOADING);
+      await invoke("save_file", {fileDest: file_});
+      setState(ScreenState.DONE);
+    }
+  }
+
+  const runProcess = async function(file_: string, select_save: boolean = true){
     setState(ScreenState.LOADING);
-    console.log(file_);
-    await invoke("cut_silences", {fileDest: file_});
-    setState(ScreenState.DONE);
+    setDisableCancel(false);
+
+    let save_file_: string | null = null;
+
+    if(select_save){
+      save_file_ = await saveFile();
+    }
+
+    if(await invoke("cut_silences", {fileDest: file_}) === null){
+      setState(ScreenState.DONE);
+      invokeSaveFile(save_file_);
+    }
+    else
+      setState(ScreenState.IDLE);
   }
 
   const handleOpenFile = async function(){
@@ -31,16 +58,17 @@ function App() {
   }
 
   const handleSaveFile = async function(){
-    const file_ = await save({
-      filters: [{name: "Music", extensions: extensionFilters}]
-    });
-    console.log("file_", file_);
-    if(file_){
-      setState(ScreenState.SAVE_LOADING);
-      await invoke("save_file", {fileDest: file_});
-      setState(ScreenState.DONE);
-    }
+    const file_ = await saveFile();
+    invokeSaveFile(file_);
   };
+
+  const handleCancel = async function(){
+    setDisableCancel(true);
+    await invoke("cancel");
+    setFile(null);
+    setState(ScreenState.IDLE);
+    setDisableCancel(false);
+  }
 
   useEffect(()=>{
     const unlisten = listen<{paths: string[]}>("tauri://drag-drop", (event)=>{
@@ -59,13 +87,19 @@ function App() {
         <Music className={state !== ScreenState.LOADING ? "title" : "title-proc"} />
           <h2 className={state !== ScreenState.LOADING ? "title" : "title-proc"} onClick={state !== ScreenState.LOADING ? handleOpenFile: ()=>undefined}>Click here or drag to open file</h2>
         </div>
-        {state == ScreenState.LOADING && <progress value={undefined} />}
+        {state == ScreenState.LOADING && <Loader size={50} className="spin" />}
       </div>
       <div className="control-wrapper">
+        {(error && state === ScreenState.ERROR) && <small className="error">{error}</small>}
+
         {file && <small className="title-proc">{file}</small>}
+
         {state === ScreenState.LOADING &&
-          <button className="cancel" onClick={()=>setFile(null)}><X /></button>
+          <button className={`cancel ${disableCancel ? "": "cancel-h"}`} onClick={handleCancel} disabled={disableCancel} style={{
+            opacity: disableCancel ? 0.6 : 1,
+          }}><X /></button>
         }
+        
         {
           (state === ScreenState.DONE || state === ScreenState.SAVE_LOADING) &&
           <button className={`save ${state !== ScreenState.SAVE_LOADING ? "save-h" : ""}`} 

@@ -67,9 +67,9 @@ pub fn remove_silences(
             }
         }
 
-        if i % 100 == 0 {
+        if i % 50 == 0 {
             if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-                cancel_cleanup();
+                cancel_cleanup(state);
                 return Option::None;
             }
         }
