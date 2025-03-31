@@ -1,4 +1,5 @@
-use std::sync::{atomic::AtomicBool, Arc, Mutex};
+use std::sync::{atomic::AtomicBool, Arc};
+use tokio::sync::Mutex;
 
 use tauri::State;
 

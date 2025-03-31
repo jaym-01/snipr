@@ -1,27 +1,34 @@
 mod cut;
 mod io;
 mod models;
+mod sidecar;
 
 use io::decode;
 use std::sync::{
     atomic::{AtomicBool, Ordering::Relaxed},
-    Arc, Mutex,
+    Arc,
 };
+use tokio::sync::Mutex;
 
 #[tauri::command]
-async fn cut_silences(state: models::AppState<'_>, file_dest: String) -> Result<(), String> {
+async fn cut_silences(
+    app_handle: tauri::AppHandle,
+    state: models::AppState<'_>,
+    file_dest: String,
+) -> Result<(), String> {
     let app_state = &state;
     state.cancelled.store(false, Relaxed);
 
-    let decoded_data =
-        decode(app_state, &file_dest).map_err(|_| "Failed to decode file".to_string())?;
+    let decoded_data = decode(app_handle, app_state, &file_dest)
+        .await
+        .map_err(|_| "Failed to decode file".to_string())?;
 
     let audio_data = cut::remove_silences(app_state, decoded_data, None, None, None);
 
     if audio_data.is_none() {
         return Err("Error while removing silences".to_string());
     } else {
-        let mut l_audio_data = app_state.audio_data.lock().unwrap();
+        let mut l_audio_data = app_state.audio_data.lock().await;
         *l_audio_data = audio_data;
         Ok(())
     }
@@ -45,12 +52,17 @@ async fn cancel(state: models::AppState<'_>) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn save_file(state: models::AppState<'_>, file_dest: String) -> Result<(), String> {
-    let l_audio_data = state.audio_data.lock().unwrap();
+async fn save_file(
+    app_handle: tauri::AppHandle,
+    state: models::AppState<'_>,
+    file_dest: String,
+) -> Result<(), String> {
+    let l_audio_data = state.audio_data.lock().await;
     if l_audio_data.is_none() {
         Err("No audio data to save".to_string())
     } else {
-        io::encode(l_audio_data.as_ref().unwrap(), &file_dest)
+        io::encode(app_handle, l_audio_data.as_ref().unwrap(), &file_dest)
+            .await
             .map_err(|_| "Failed to saved file".to_string())?;
         Ok(())
     }

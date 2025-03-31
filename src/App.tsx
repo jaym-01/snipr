@@ -71,6 +71,8 @@ function App() {
   }
 
   useEffect(()=>{
+    runProcess("C:\\Users\\jay_m\\Downloads\\LGTVG42024_VoiceOver_ORIGINAL.mp3", false);
+
     const unlisten = listen<{paths: string[]}>("tauri://drag-drop", (event)=>{
       const allPaths = event.payload.paths;
       if(allPaths && allPaths.length > 0 && extensionFilters.includes(allPaths[0].substring(allPaths[0].length-3))){

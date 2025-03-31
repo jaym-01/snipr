@@ -23,7 +23,7 @@ pub fn remove_silences(
 
     let mut new_samples = Vec::new();
 
-    while i < data.data.len() {
+    while i <= data.data.len() - (data.channels as usize * 2) {
         // find max amp of all channels
         let mut max_amp = 0;
         for j in 0..(data.channels as usize) {

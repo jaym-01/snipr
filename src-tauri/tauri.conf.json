@@ -31,8 +31,8 @@
       "icons/icon.ico"
     ],
     "externalBin": [
-      "binaries/ffmpeg.exe",
-      "binaries/ffmpeg"
+      "binaries/ffmpeg",
+      "binaries/ffprobe"
     ]
   }
 }
