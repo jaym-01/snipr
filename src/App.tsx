@@ -17,7 +17,6 @@ function saveFile(){
 function App() {
   const [state, setState] = useState<ScreenState>(ScreenState.IDLE);
   const [file, setFile] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [disableCancel, setDisableCancel] = useState(false);
 
   const invokeSaveFile = async function(file_: string | null){
@@ -71,8 +70,6 @@ function App() {
   }
 
   useEffect(()=>{
-    runProcess("C:\\Users\\jay_m\\Downloads\\LGTVG42024_VoiceOver_ORIGINAL.mp3", false);
-
     const unlisten = listen<{paths: string[]}>("tauri://drag-drop", (event)=>{
       const allPaths = event.payload.paths;
       if(allPaths && allPaths.length > 0 && extensionFilters.includes(allPaths[0].substring(allPaths[0].length-3))){
@@ -80,6 +77,8 @@ function App() {
         runProcess(event.payload.paths[0]);
       }
     });
+
+    return ()=>{unlisten};
   }, [])
 
   return (
@@ -92,7 +91,6 @@ function App() {
         {state == ScreenState.LOADING && <Loader size={50} className="spin" />}
       </div>
       <div className="control-wrapper">
-        {(error && state === ScreenState.ERROR) && <small className="error">{error}</small>}
 
         {file && <small className="title-proc">{file}</small>}
 
