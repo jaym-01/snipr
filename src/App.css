@@ -4,6 +4,8 @@
   /* --sec-trans: #c1bfbc; */
   --error: #d34242;
 
+  --progress-h: 10px;
+
   font-family: "Poppins", sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -73,6 +75,29 @@
 .save-txt {
   color: var(--secondary);
   opacity: 0.6;
+}
+
+.progress {
+  height: var(--progress-h);
+  width: 100%;
+  background-color: var(--secondary);
+  transition: width 0.2s ease-in-out;
+  border-radius: 999px;
+}
+
+.progress-wrapper {
+  width: 40%;
+  height: var(--progress-h);
+  background: rgb(from var(--secondary) r g b / 20%);
+  display: flex;
+  flex-direction: row;
+  border-radius: 999px;
+}
+
+.progress-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .control-wrapper {

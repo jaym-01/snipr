@@ -1,8 +1,10 @@
 use crate::io::cancel_cleanup;
 use crate::models::{self, AppState, AudioData};
+use crate::progress::send_progress;
 
 // TODO: add padding to cuts
 pub fn remove_silences(
+    app_handle: tauri::AppHandle,
     state: &AppState<'_>,
     data: models::AudioData,
     min_sil: Option<f64>,
@@ -22,6 +24,10 @@ pub fn remove_silences(
     let mut start = -1;
 
     let mut new_samples = Vec::new();
+
+    // this is the base number for updating the progress bar
+    let increment = data.data.len() / 6;
+    let mut cur_increment = 0;
 
     while i <= data.data.len() - (data.channels as usize * 2) {
         // find max amp of all channels
@@ -72,6 +78,11 @@ pub fn remove_silences(
                 cancel_cleanup(state);
                 return Option::None;
             }
+        }
+
+        if i >= cur_increment * increment {
+            cur_increment += 1;
+            send_progress(&app_handle, (cur_increment * 10 + 30) as u64);
         }
     }
 

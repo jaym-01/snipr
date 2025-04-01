@@ -1,4 +1,5 @@
 use crate::models::{self, AppState};
+use crate::progress::send_progress;
 use crate::sidecar::run_side_car;
 use tauri_plugin_shell::ShellExt;
 
@@ -9,7 +10,7 @@ pub fn cancel_cleanup(state: &AppState<'_>) {
 }
 
 pub async fn decode(
-    app_handle: tauri::AppHandle,
+    app_handle: &tauri::AppHandle,
     state: &AppState<'_>,
     input_file: &str,
 ) -> Result<models::AudioData, std::io::Error> {
@@ -20,6 +21,9 @@ pub async fn decode(
             "Operation cancelled",
         ));
     }
+
+    send_progress(&app_handle, 5);
+
     // get meta data - the channels + sample rate
     let raw_meta_data = run_side_car(
         &app_handle,
@@ -35,6 +39,8 @@ pub async fn decode(
         ],
     )
     .await;
+
+    send_progress(&app_handle, 10);
 
     let output_str = String::from_utf8_lossy(&raw_meta_data);
 
@@ -74,6 +80,8 @@ pub async fn decode(
         ));
     }
 
+    send_progress(&app_handle, 15);
+
     // extract the audio samples from the mp3 file
     let data: Vec<u8> = run_side_car(
         &app_handle,
@@ -81,6 +89,8 @@ pub async fn decode(
         &["-i", input_file, "-f", "s16le", "-acodec", "pcm_s16le", "-"],
     )
     .await;
+
+    send_progress(&app_handle, 30);
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);

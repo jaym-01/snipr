@@ -1,6 +1,7 @@
 mod cut;
 mod io;
 mod models;
+mod progress;
 mod sidecar;
 
 use io::decode;
@@ -19,11 +20,11 @@ async fn cut_silences(
     let app_state = &state;
     state.cancelled.store(false, Relaxed);
 
-    let decoded_data = decode(app_handle, app_state, &file_dest)
+    let decoded_data = decode(&app_handle, app_state, &file_dest)
         .await
         .map_err(|_| "Failed to decode file".to_string())?;
 
-    let audio_data = cut::remove_silences(app_state, decoded_data, None, None, None);
+    let audio_data = cut::remove_silences(app_handle, app_state, decoded_data, None, None, None);
 
     if audio_data.is_none() {
         return Err("Error while removing silences".to_string());
