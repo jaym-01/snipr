@@ -8,23 +8,30 @@ import "./App.css";
 
 const extensionFilters = ["mp3", "wav", "flac"];
 
-function saveFile(){
-  return save({
-    filters: [{name: "Music", extensions: extensionFilters}]
-  });
-}
-
 function App() {
   const [state, setState] = useState<ScreenState>(ScreenState.IDLE);
   const [file, setFile] = useState<string | null>(null);
+  const [savedFile, setSavedFile] = useState<string | null>(null);
   const [disableCancel, setDisableCancel] = useState(false);
 
   const invokeSaveFile = async function(file_: string | null){
     if(file_){
+      setSavedFile(file_);
       setState(ScreenState.SAVE_LOADING);
       await invoke("save_file", {fileDest: file_});
       setState(ScreenState.DONE);
     }
+  }
+
+  const saveFile = async function(){
+    const file_ = await save({
+      filters: [{name: "Music", extensions: extensionFilters}]
+    });
+    if(file_) {
+      setSavedFile(null);
+      setSavedFile(file_)
+    }
+    return file_;
   }
 
   const runProcess = async function(file_: string, select_save: boolean = true){
@@ -51,9 +58,10 @@ function App() {
       directory: false,
       filters: [{name: "Music", extensions: extensionFilters}]
     });
-    setFile(file);
-    if(file)
+    if(file){
+      setFile(file);
       runProcess(file.toString());
+    }
   }
 
   const handleSaveFile = async function(){
@@ -65,6 +73,7 @@ function App() {
     setDisableCancel(true);
     await invoke("cancel");
     setFile(null);
+    setSavedFile(null);
     setState(ScreenState.IDLE);
     setDisableCancel(false);
   }
@@ -112,6 +121,8 @@ function App() {
           {state === ScreenState.SAVE_LOADING && <Loader className="spin" />}
           </button>
         }
+
+        {savedFile && <small className="save-txt">{state === ScreenState.LOADING || state === ScreenState.SAVE_LOADING ? "Saving" : "Saved"} to: {savedFile}</small>}
       </div>
     </main>
   );

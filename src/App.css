@@ -1,7 +1,7 @@
 :root {
   --primary: #f1efeb;
   --secondary: #333333;
-  --sec-trans: #c1bfbc;
+  /* --sec-trans: #c1bfbc; */
   --error: #d34242;
 
   font-family: "Poppins", sans-serif;
@@ -66,7 +66,13 @@
 }
 
 .title-proc {
-  color: var(--sec-trans);
+  color: var(--secondary);
+  opacity: 0.4;
+}
+
+.save-txt {
+  color: var(--secondary);
+  opacity: 0.6;
 }
 
 .control-wrapper {
@@ -92,17 +98,20 @@
   /* cursor: pointer; */
 
   transition: all 0.1s ease-in-out;
+  box-shadow: rgba(99, 99, 99, 0.5) 0px 2px 8px 0px;
 }
 
 .save-h:hover {
   opacity: 0.95;
   transform: scale(1.03);
+  box-shadow: rgba(99, 99, 99, 0.8) 0px 2px 10px 0px;
 }
 
 .cancel-h:hover {
   opacity: 0.9;
   transform: scale(1.13);
   cursor: pointer;
+  box-shadow: rgba(99, 99, 99, 0.8) 0px 2px 10px 0px;
 }
 
 .save {
@@ -129,6 +138,7 @@
   font-weight: 600;
 
   transition: all 0.1s ease-in-out;
+  box-shadow: rgba(99, 99, 99, 0.5) 0px 2px 8px 0px;
 }
 
 .spin {
