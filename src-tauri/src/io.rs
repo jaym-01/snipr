@@ -1,16 +1,8 @@
 use crate::models::{self, AppState};
 use crate::sidecar::run_side_car;
-use std::fs::{remove_file, File};
-use std::io::{BufWriter, Write};
-use std::path::Path;
-
-pub const TMP_PCM_PATH: &str = "temp.pcm";
+use tauri_plugin_shell::ShellExt;
 
 pub fn cancel_cleanup(state: &AppState<'_>) {
-    if Path::new(TMP_PCM_PATH).exists() {
-        std::fs::remove_file(TMP_PCM_PATH).unwrap();
-    }
-
     state
         .cancelled
         .store(false, std::sync::atomic::Ordering::Relaxed);
@@ -110,22 +102,12 @@ pub async fn encode(
     data: &models::AudioData,
     path: &str,
 ) -> Result<(), std::io::Error> {
-    // Create a temporary file to store PCM data
-    let pcm_file = File::create(TMP_PCM_PATH)?;
-    let mut writer = BufWriter::new(pcm_file);
-
-    // Write the PCM data to the file
-    for &sample in data.data.iter() {
-        writer.write_all(&sample.to_le_bytes())?;
-    }
-
-    writer.flush()?;
-
-    // write the data to a file specified
-    run_side_car(
-        &app_handle,
-        "ffmpeg",
-        &[
+    // run side car to convert the PCM data to the desired format
+    let sidecar = app_handle
+        .shell()
+        .sidecar("ffmpeg")
+        .unwrap()
+        .args([
             "-y",
             "-f",
             "s16le",
@@ -134,14 +116,17 @@ pub async fn encode(
             "-ac",
             &data.channels.to_string(),
             "-i",
-            TMP_PCM_PATH,
+            "-",
             path,
-        ],
-    )
-    .await;
+        ])
+        .set_raw_out(true);
 
-    // remove the PCM file made
-    remove_file(TMP_PCM_PATH)?;
+    let (mut rx, mut child) = sidecar.spawn().expect("Failed to spawn sidecar");
+
+    child.write(&data.data).unwrap();
+    drop(child);
+
+    while rx.recv().await.is_some() {}
 
     Ok(())
 }
