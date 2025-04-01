@@ -9,6 +9,13 @@ import ProgressBar from "./ProgressBar.tsx";
 
 const extensionFilters = ["mp3", "wav", "flac"];
 
+
+function saveFile(){
+  return save({
+    filters: [{name: "Music", extensions: extensionFilters}]
+  });
+}
+
 function App() {
   const [state, setState] = useState<ScreenState>(ScreenState.IDLE);
   const [file, setFile] = useState<string | null>(null);
@@ -27,17 +34,6 @@ function App() {
     }
   }
 
-  const saveFile = async function(){
-    const file_ = await save({
-      filters: [{name: "Music", extensions: extensionFilters}]
-    });
-    if(file_) {
-      setSavedFile(null);
-      setSavedFile(file_)
-    }
-    return file_;
-  }
-
   const runProcess = async function(file_: string, select_save: boolean = true){
     setState(ScreenState.LOADING);
     setDisableCancel(false);
@@ -48,6 +44,7 @@ function App() {
     if(select_save){
       save_file_ = await saveFile();
     }
+    setSavedFile(save_file_);
 
     if(await invoke("cut_silences", {fileDest: file_}) === null){
       setState(ScreenState.DONE);
@@ -71,6 +68,8 @@ function App() {
 
   const handleSaveFile = async function(){
     const file_ = await saveFile();
+    if(file_)
+      setSavedFile(file_);
     invokeSaveFile(file_);
   };
 
