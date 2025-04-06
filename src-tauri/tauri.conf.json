@@ -34,6 +34,9 @@
       "binaries/ffmpeg",
       "binaries/ffprobe"
     ],
+    "resources": [
+      "libraries/*.dll"
+    ],
     "windows": {
       "webviewInstallMode": {
         "type": "offlineInstaller"

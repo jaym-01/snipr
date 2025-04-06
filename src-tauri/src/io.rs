@@ -1,6 +1,6 @@
 use crate::models::{self, AppState};
 use crate::progress::send_progress;
-use crate::sidecar::run_side_car;
+use crate::sidecar::{self, run_side_car};
 use tauri_plugin_shell::ShellExt;
 
 pub fn cancel_cleanup(state: &AppState<'_>) {
@@ -129,6 +129,7 @@ pub async fn encode(
             "-",
             path,
         ])
+        .env("PATH", sidecar::get_dll_path(&app_handle))
         .set_raw_out(true);
 
     let (mut rx, mut child) = sidecar.spawn().expect("Failed to spawn sidecar");
