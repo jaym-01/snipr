@@ -3,6 +3,7 @@ mod io;
 mod models;
 mod progress;
 mod sidecar;
+mod menu;
 
 use io::decode;
 use std::sync::{
@@ -72,6 +73,10 @@ async fn save_file(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            crate::menu::setup_menu(&app).unwrap();
+            Ok(())
+        })
         .plugin(tauri_plugin_shell::init())
         .manage(models::CutState {
             cancelled: Arc::new(AtomicBool::new(false)),
