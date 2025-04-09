@@ -1,0 +1,72 @@
+@import "./App.css";
+
+:root {
+  --curve: 6px;
+}
+
+.num-input {
+  width: 70px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  --p-y: 4px;
+  padding-top: var(--p-y);
+  padding-bottom: var(--p-y);
+
+  background-color: var(--primary);
+
+  outline: none;
+  border: 1px solid var(--secondary);
+  color: var(--secondary);
+  border-radius: 8px;
+
+  transition: all 0.1s ease-in-out;
+}
+.num-input:focus {
+  border-color: #c89c6c;
+}
+
+.num-label {
+  text-align: end;
+  flex: 1;
+  font-weight: 500;
+}
+
+.input-wrapper {
+  display: grid;
+  grid-template-columns: max-content auto;
+  gap: 6px;
+  row-gap: 20px;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-20px);
+  padding: 30px;
+}
+
+.button-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-top: 20px;
+  --px: 60px;
+  padding-left: var(--px);
+  padding-right: var(--px);
+}
+
+.sbutton {
+  background-color: var(--secondary);
+  color: var(--primary);
+  font-family: "Poppins", sans-serif;
+  padding: 7px 20px;
+  border-radius: var(--curve);
+  transition: all 0.1s ease-in-out;
+  outline: none;
+  border: none;
+}
+
+.sbuttone:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+  box-shadow: rgba(99, 99, 99, 0.5) 2px 3px 4px 0px;
+  cursor: pointer;
+}

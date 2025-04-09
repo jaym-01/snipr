@@ -33,7 +33,8 @@ pub fn setup_menu(app: &tauri::App) -> Result<(), String> {
                     let webview_url = tauri::WebviewUrl::App("settings.html".into());
                     tauri::WebviewWindowBuilder::new(app_handle, "settings", webview_url)
                     .title("Settings")
-                    .build().unwrap();
+                    .resizable(false)
+                    .build().unwrap().set_size(tauri::LogicalSize::new(500.0, 600.0)).unwrap();
                 }
                 
             },

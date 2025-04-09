@@ -11,7 +11,7 @@
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
+  color: #333333;
   background-color: var(--primary);
 
   font-synthesis: none;
@@ -21,7 +21,9 @@
   -webkit-text-size-adjust: 100%;
 }
 
-#root, body, html {
+#root,
+body,
+html {
   height: 100%;
   width: 100%;
   padding: 0;
