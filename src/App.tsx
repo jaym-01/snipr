@@ -1,5 +1,8 @@
-import Home from "@/components/pages/Home.tsx";
+import {ThemeProvider} from "@/utils/theme.tsx";
+import {JSX} from "react";
 
-export default function App() {
-  return <Home />;
+export default function App({children}: { children?: JSX.Element | JSX.Element[] }) {
+  return <ThemeProvider>
+    {children}
+  </ThemeProvider>;
 }

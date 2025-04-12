@@ -3,6 +3,7 @@ import "@/App.css";
 import "@/Settings.css";
 import { useState, useRef, useEffect, InputHTMLAttributes } from "react";
 import { CutProps } from "@/utils/settings.ts";
+import App from "@/App.tsx";
 
 function Settings() {
   const [tmpSettings, setTmpSettings] = useState<CutProps>(new CutProps());
@@ -153,5 +154,7 @@ function NumInput({
 }
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+    <App>
   <Settings />
+    </App>
 );

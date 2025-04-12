@@ -1,7 +1,6 @@
 :root {
   --primary: #f1efeb;
   --secondary: #333333;
-  /* --sec-trans: #c1bfbc; */
   --error: #d34242;
 
   --progress-h: 10px;
@@ -19,6 +18,15 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+[data-theme="dark"] {
+        --primary: #333333;
+        --secondary: #f1efeb;
+        --error: #d34242;
+
+        color: var(--secondary);
+        background-color: var(--primary);
 }
 
 * {
@@ -156,9 +164,6 @@ html {
   color: var(--primary);
   border: none;
   border-radius: 7px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   --sides: 20px;
   padding: 10px;
   padding-left: var(--sides);
@@ -195,4 +200,24 @@ html {
   font-weight: 400;
   text-align: center;
   padding: 10px;
+}
+
+
+.theme-toggle {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  padding: 10px;
+
+  transition: all 0.1s ease-in-out;
+
+  border: none;
+
+  color: var(--secondary);
+  background-color: transparent;
+}
+
+.theme-toggle:hover {
+  opacity: 0.5;
+  cursor: pointer;
 }

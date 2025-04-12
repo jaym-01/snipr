@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
-import { Music, X, Loader } from 'lucide-react';
+import {Music, X, Loader, Laptop, Sun, Moon} from 'lucide-react';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { ScreenState } from "@/states.ts";
 import ProgressBar from "../ProgressBar.tsx";
 import {CutProps} from "@/utils/settings.ts";
+import { useTheme } from "@/utils/theme.tsx";
 
 const extensionFilters = ["mp3", "wav", "flac"];
 
@@ -118,8 +119,13 @@ export default function Home() {
     };
   }, [])
 
+  const {theme, toggleTheme} = useTheme();
+
   return (
     <main className="container">
+      <button onClick={async ()=> await toggleTheme()} className="theme-toggle">
+        {theme === "dark" ? <Moon />: (theme === "light" ? <Sun /> : <Laptop />)}
+      </button>
       <div className="main-wrapper">
         <div className={`title-content ${state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title-content-h": ""}`}>
         <Music className={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title" : "title-proc"} />

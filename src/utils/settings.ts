@@ -2,6 +2,8 @@ import { load } from "@tauri-apps/plugin-store";
 
 const key = "cut-props";
 
+export const storage = "store.json";
+
 export class CutProps {
   minSilence: number;
   threshold: number;
@@ -14,19 +16,22 @@ export class CutProps {
   }
 
   async load() {
-    const store = await load("store.json", { autoSave: false });
+    const store = await load(storage, { autoSave: false });
     const data = await store.get<CutProps>(key);
     if (data) {
       this.minSilence = data.minSilence;
       this.threshold = data.threshold;
       this.padding = data.padding;
     }
+
+    // await store.close();
   }
 
   async save() {
-    const store = await load("store.json", { autoSave: false });
-    store.set(key, this);
+    const store = await load(storage, { autoSave: false });
+    await store.set(key, this);
     await store.save();
+    // await store.close();
   }
 
   clone() {
