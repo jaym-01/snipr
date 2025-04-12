@@ -1,5 +1,5 @@
-use tauri_plugin_shell::{process::CommandEvent, ShellExt};
 use tauri::Manager;
+use tauri_plugin_shell::{process::CommandEvent, ShellExt};
 
 // get the path of the dlls needed for ffmpeg
 pub fn get_dll_path(app_handle: &tauri::AppHandle) -> String {

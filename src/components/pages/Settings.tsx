@@ -1,13 +1,19 @@
 import ReactDOM from "react-dom/client";
 import "@/App.css";
 import "@/Settings.css";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CutProps } from "@/utils/settings.ts";
 
 function Settings() {
   const [tmpSettings, setTmpSettings] = useState<CutProps>(new CutProps());
   const [saveEnabled, setSaveEnabled] = useState(false);
   const settings = useRef(new CutProps());
+
+  useEffect(() => {
+    settings.current.load().then(() => {
+      setTmpSettings(settings.current as CutProps);
+    });
+  }, []);
 
   const updateEnable = (compare: CutProps) =>
     Object.entries(compare).some(
@@ -16,19 +22,27 @@ function Settings() {
       ? setSaveEnabled(true)
       : setSaveEnabled(false);
 
-  const getHandleUpdate = (key: keyof CutProps) => {
-    return (value: number) => {
+  const getHandleUpdate = function <K extends keyof CutProps>(key: K) {
+    return (value: CutProps[K]) => {
+      console.log("value", key, value);
+
       // check if tmpSettings is different from settings
-      updateEnable({ ...tmpSettings, [key]: value });
+      updateEnable({ ...tmpSettings, [key]: value } as CutProps);
 
       setTmpSettings((prev) => {
-        const newSettings = { ...prev, [key]: value };
-        return newSettings;
+        const clone = prev.clone();
+        clone[key] = value;
+        return clone;
       });
     };
   };
 
-  const handleSave = () => {};
+  const handleSave = () => {
+    console.log("Saving settings", tmpSettings);
+    tmpSettings.save();
+    setSaveEnabled(false);
+    settings.current = tmpSettings;
+  };
 
   const handleReset = () => {
     setTmpSettings(new CutProps());
