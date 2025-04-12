@@ -17,6 +17,9 @@ async fn cut_silences(
     app_handle: tauri::AppHandle,
     state: models::AppState<'_>,
     file_dest: String,
+    min_sil: Option<f64>,
+    padding: Option<f64>,
+    threshold: Option<u16>,
 ) -> Result<(), String> {
     let app_state = &state;
     state.cancelled.store(false, Relaxed);
@@ -25,7 +28,7 @@ async fn cut_silences(
         .await
         .map_err(|_| "Failed to decode file".to_string())?;
 
-    let audio_data = cut::remove_silences(app_handle, app_state, decoded_data, None, None, None);
+    let audio_data = cut::remove_silences(app_handle, app_state, decoded_data, min_sil, padding, threshold);
 
     if audio_data.is_none() {
         return Err("Error while removing silences".to_string());

@@ -37,7 +37,7 @@ pub fn setup_menu(app: &tauri::App) -> Result<(), String> {
                     .resizable(false)
                     .build()
                     .unwrap()
-                    .set_size(tauri::LogicalSize::new(500.0, 600.0))
+                    .set_size(tauri::LogicalSize::new(500.0, 450.0))
                     .unwrap();
             }
         }

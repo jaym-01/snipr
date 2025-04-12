@@ -39,7 +39,7 @@ pub fn remove_silences(
                 .max(i16::from_le_bytes([data.data[index], data.data[index + 1]]).unsigned_abs());
         }
 
-        // add samples the the final samples array
+        // add samples the final samples array
         for j in 0..(data.channels as usize) {
             // offset by 2 bytes
             let index = i + j * 2;

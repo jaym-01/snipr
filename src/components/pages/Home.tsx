@@ -5,9 +5,9 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { ScreenState } from "@/states.ts";
 import ProgressBar from "../ProgressBar.tsx";
+import {CutProps} from "@/utils/settings.ts";
 
 const extensionFilters = ["mp3", "wav", "flac"];
-
 
 function saveFile(){
   return save({
@@ -45,9 +45,18 @@ export default function Home() {
     }
     setSavedFile(save_file_);
 
-    if(await invoke("cut_silences", {fileDest: file_}) === null){
+    let cutProps : CutProps | null = null;
+    try {
+      cutProps = new CutProps();
+      await cutProps.load();
+    }
+    catch {}
+
+    console.log(cutProps);
+
+    if(await invoke("cut_silences", {fileDest: file_, minSil: cutProps?.minSilence, padding: cutProps?.padding, threshold: cutProps?.threshold}) === null){
       setState(ScreenState.DONE);
-      invokeSaveFile(save_file_);
+      await invokeSaveFile(save_file_);
     }
     else
       setState(ScreenState.IDLE);
@@ -61,7 +70,7 @@ export default function Home() {
     });
     if(file){
       setFile(file);
-      runProcess(file.toString());
+      await runProcess(file.toString());
     }
   }
 
@@ -69,7 +78,7 @@ export default function Home() {
     const file_ = await saveFile();
     if(file_)
       setSavedFile(file_);
-    invokeSaveFile(file_);
+    await invokeSaveFile(file_);
   };
 
   const handleCancel = async function(){
@@ -116,8 +125,7 @@ export default function Home() {
         <Music className={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title" : "title-proc"} />
           <h2 className={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? "title" : "title-proc"} onClick={state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING  ? handleOpenFile: ()=>undefined}>Click here or drag to open file</h2>
         </div>
-        {/* {state == ScreenState.LOADING && <Loader size={50} className="spin" />} */}
-        {/* {state == ScreenState.LOADING && <progress value={curProgress/100} />} */}
+
         {state == ScreenState.LOADING && <ProgressBar p={curProgress} />}
       </div>
       <div className="control-wrapper">
@@ -125,14 +133,14 @@ export default function Home() {
         {file && <small className="title-proc">{file}</small>}
 
         {state === ScreenState.LOADING &&
-          <button type="button" className={`cancel ${disableCancel ? "": "cancel-h"}`} onClick={handleCancel} disabled={disableCancel} style={{
+          <button type="button" className="cancel" onClick={handleCancel} disabled={disableCancel} style={{
             opacity: disableCancel ? 0.6 : 1,
           }}><X /></button>
         }
         
         {
           (state === ScreenState.DONE || state === ScreenState.SAVE_LOADING) &&
-          <button type="button" className={`save ${state !== ScreenState.SAVE_LOADING ? "save-h" : ""}`} 
+          <button type="button" className="save"
           disabled={state === ScreenState.SAVE_LOADING} 
           onClick={handleSaveFile}
           style={{
