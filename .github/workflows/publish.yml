@@ -35,9 +35,10 @@ jobs:
 
       - name: Setup FFmpeg
         id: setup-ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v2
+        uses: FedericoCarboni/setup-ffmpeg@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          linking-type: shared
 
       - name: (Windows) Copy the FFmpeg binaries
         if: matrix.platform == 'windows-latest'
