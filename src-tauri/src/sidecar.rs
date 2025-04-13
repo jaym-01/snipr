@@ -17,7 +17,6 @@ pub async fn run_side_car(app_handle: &tauri::AppHandle, program: &str, args: &[
         .shell()
         .sidecar(program)
         .unwrap()
-        .env("PATH", get_dll_path(app_handle))
         .args(args)
         .set_raw_out(true);
 

@@ -44,6 +44,8 @@ pub async fn decode(
 
     let output_str = String::from_utf8_lossy(&raw_meta_data);
 
+    println!("Output: {}", output_str);
+
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);
         return Err(std::io::Error::new(
@@ -129,7 +131,7 @@ pub async fn encode(
             "-",
             path,
         ])
-        .env("PATH", sidecar::get_dll_path(&app_handle))
+        // .env("PATH", sidecar::get_dll_path(&app_handle))
         .set_raw_out(true);
 
     let (mut rx, mut child) = sidecar.spawn().expect("Failed to spawn sidecar");
