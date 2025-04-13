@@ -55,7 +55,7 @@ jobs:
         run: |
           mkdir -p src-tauri/binaries
           echo "FFmpeg path: ${{ steps.setup-ffmpeg.outputs.path }}"
-          ls ${{ steps.setup-ffmpeg.outputs.path }}
+          ls "${{ steps.setup-ffmpeg.outputs.path }}"
           if compgen -G "${{ steps.setup-ffmpeg.outputs.path }}/*.dll" > /dev/null; then
             cp "${{ steps.setup-ffmpeg.outputs.path }}/*.dll" src-tauri/binaries/
           else
