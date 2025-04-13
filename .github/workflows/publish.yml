@@ -36,9 +36,6 @@ jobs:
       - name: Setup FFmpeg
         id: setup-ffmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          linking-type: shared
 
       - name: (Windows) Copy the FFmpeg binaries
         if: matrix.platform == 'windows-latest'
@@ -49,20 +46,6 @@ jobs:
           echo "FFmpeg path: ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}"
           cp "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}/ffmpeg.exe" src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
           cp "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}/ffprobe.exe" src-tauri/binaries/ffprobe-x86_64-pc-windows-msvc.exe
-          ls src-tauri/binaries/
-
-      - name: (Windows) Copy the .dll files
-        if: matrix.platform == 'windows-latest'
-        shell: bash
-        run: |
-          mkdir -p src-tauri/binaries
-          echo "FFmpeg path: ${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}"
-          ls "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}"
-          if compgen -G "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}/*.dll" > /dev/null; then
-            cp "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}/*.dll" src-tauri/binaries/
-          else
-            echo "No .dll files found in the expected path."
-          fi
           ls src-tauri/binaries/
       
       - uses: tauri-apps/tauri-action@v0
