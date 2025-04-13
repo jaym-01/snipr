@@ -55,7 +55,12 @@ jobs:
         run: |
           mkdir -p src-tauri/binaries
           echo "FFmpeg path: ${{ steps.setup-ffmpeg.outputs.path }}"
-          cp "${{ steps.setup-ffmpeg.outputs.path }}/*.dll" src-tauri/libraries/
+          ls ${{ steps.setup-ffmpeg.outputs.path }}
+          if compgen -G "${{ steps.setup-ffmpeg.outputs.path }}/*.dll" > /dev/null; then
+            cp "${{ steps.setup-ffmpeg.outputs.path }}/*.dll" src-tauri/binaries/
+          else
+            echo "No .dll files found in the expected path."
+          fi
           ls src-tauri/binaries/
       
       - uses: tauri-apps/tauri-action@v0
