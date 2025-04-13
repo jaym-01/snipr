@@ -28,7 +28,14 @@ async fn cut_silences(
         .await
         .map_err(|_| "Failed to decode file".to_string())?;
 
-    let audio_data = cut::remove_silences(app_handle, app_state, decoded_data, min_sil, padding, threshold);
+    let audio_data = cut::remove_silences(
+        app_handle,
+        app_state,
+        decoded_data,
+        min_sil,
+        padding,
+        threshold,
+    );
 
     if audio_data.is_none() {
         return Err("Error while removing silences".to_string());
@@ -76,6 +83,7 @@ async fn save_file(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
             crate::menu::setup_menu(&app).unwrap();

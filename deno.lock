@@ -7,6 +7,7 @@
     "npm:@tauri-apps/plugin-opener@2": "2.2.6",
     "npm:@tauri-apps/plugin-shell@2.2": "2.2.0",
     "npm:@tauri-apps/plugin-store@2.2": "2.2.0",
+    "npm:@tauri-apps/plugin-updater@2.7": "2.7.0",
     "npm:@types/react-dom@^18.3.1": "18.3.5_@types+react@18.3.20",
     "npm:@types/react@^18.3.1": "18.3.20",
     "npm:@vitejs/plugin-react@^4.3.4": "4.3.4_vite@6.2.3_@babel+core@7.26.10",
@@ -392,6 +393,12 @@
         "@tauri-apps/api"
       ]
     },
+    "@tauri-apps/plugin-updater@2.7.0": {
+      "integrity": "sha512-oBug5UCH2wOsoYk0LW5LEMAT51mszjg11s8eungRH26x/qOrEjLvnuJJoxVVr9nsWowJ6vnpXKS+lUMfFTlvHQ==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@types/babel__core@7.20.5": {
       "integrity": "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==",
       "dependencies": [
@@ -656,6 +663,7 @@
         "npm:@tauri-apps/plugin-opener@2",
         "npm:@tauri-apps/plugin-shell@2.2",
         "npm:@tauri-apps/plugin-store@2.2",
+        "npm:@tauri-apps/plugin-updater@2.7",
         "npm:@types/react-dom@^18.3.1",
         "npm:@types/react@^18.3.1",
         "npm:@vitejs/plugin-react@^4.3.4",

@@ -21,12 +21,12 @@
 }
 
 [data-theme="dark"] {
-        --primary: #333333;
-        --secondary: #f1efeb;
-        --error: #d34242;
+  --primary: #333333;
+  --secondary: #f1efeb;
+  --error: #d34242;
 
-        color: var(--secondary);
-        background-color: var(--primary);
+  color: var(--secondary);
+  background-color: var(--primary);
 }
 
 * {
@@ -201,7 +201,6 @@ html {
   text-align: center;
   padding: 10px;
 }
-
 
 .theme-toggle {
   position: fixed;

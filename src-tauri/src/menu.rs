@@ -32,13 +32,17 @@ pub fn setup_menu(app: &tauri::App) -> Result<(), String> {
                 window.show().unwrap();
             } else {
                 let webview_url = tauri::WebviewUrl::App("settings.html".into());
-                tauri::WebviewWindowBuilder::new(app_handle, MenuOption::Settings.text(), webview_url)
-                    .title("Settings")
-                    .resizable(false)
-                    .build()
-                    .unwrap()
-                    .set_size(tauri::LogicalSize::new(500.0, 450.0))
-                    .unwrap();
+                tauri::WebviewWindowBuilder::new(
+                    app_handle,
+                    MenuOption::Settings.text(),
+                    webview_url,
+                )
+                .title("Settings")
+                .resizable(false)
+                .build()
+                .unwrap()
+                .set_size(tauri::LogicalSize::new(500.0, 450.0))
+                .unwrap();
             }
         }
         val if val == MenuOption::Quit.text() => {
