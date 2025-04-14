@@ -49,6 +49,7 @@ jobs:
           ls src-tauri/binaries/
       
       - uses: tauri-apps/tauri-action@v0
+        id: app-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -59,3 +60,14 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - name: upload release assets
+        shell: bash
+        run: |
+          echo "paths: ${{ steps.app-build.outputs.artifactPaths }}"
+          ls ${{ steps.app-build.outputs.artifactPaths }}
+          git config --global user.name ${{ secrets.USERNAME }}
+          git config --global user.email ${{ secrets.EMAIL }}
+          git clone https://x-access-token:${{ secrets.RELEASE }}@github.com/${{ secrets.USERNAME }}/snipr-release.git target
+          ls target
+
