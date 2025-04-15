@@ -69,12 +69,14 @@ jobs:
           git config --global user.email ${{ secrets.EMAIL }}
           git clone https://x-access-token:${{ secrets.RELEASE }}@github.com/${{ secrets.USERNAME }}/snipr-release.git target
 
+          build_path="target/build"
+
           # remove existing builds
-          if [ -d "target/build" ]; then
-            rm -rf target/build
+          if [ -d "$build_path" ]; then
+            rm -rf $build_path
           fi
 
-          mkdir target/build
+          mkdir $build_path
 
           # copy the new build assets
           raw='${{ steps.app-build.outputs.artifactPaths }}'
@@ -87,10 +89,10 @@ jobs:
             tmp="${tmp%\"}"
             IFS="\\\\" read -ra subdirs <<< "$tmp"
             subdirs_size=${#subdirs[@]}
-            cp $p \"build/${subdirs[$subdirs_size-1]}\"
+            cp $p \"$build_path/${subdirs[$subdirs_size-1]}\"
           done
 
-          cd target/build
+          cd $build_path
           git add .
           git commit -m "New release from GitHub Actions"
           git push origin main
