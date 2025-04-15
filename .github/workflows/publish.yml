@@ -64,17 +64,34 @@ jobs:
       - name: upload release assets
         shell: bash
         run: |
+          # download the release repo
+          git config --global user.name ${{ secrets.USERNAME }}
+          git config --global user.email ${{ secrets.EMAIL }}
+          git clone https://x-access-token:${{ secrets.RELEASE }}@github.com/${{ secrets.USERNAME }}/snipr-release.git target
+
+          # remove existing builds
+          if [ -d "target/build" ]; then
+            rm -rf target/build
+          fi
+
+          mkdir target/build
+
+          # copy the new build assets
           raw='${{ steps.app-build.outputs.artifactPaths }}'
           clean="${raw#[}"
           clean="${clean%]}"
           IFS=',' read -ra paths <<< "$clean"
 
           for p in "${paths[@]}"; do
-            echo "Checking path: $p"
+            tmp="${p#\"}"
+            tmp="${tmp%\"}"
+            IFS="\\\\" read -ra subdirs <<< "$tmp"
+            subdirs_size=${#subdirs[@]}
+            cp $p \"build/${subdirs[$subdirs_size-1]}\"
           done
 
-          git config --global user.name ${{ secrets.USERNAME }}
-          git config --global user.email ${{ secrets.EMAIL }}
-          git clone https://x-access-token:${{ secrets.RELEASE }}@github.com/${{ secrets.USERNAME }}/snipr-release.git target
-          ls target
+          cd target/build
+          git add .
+          git commit -m "New release from GitHub Actions"
+          git push origin main
 
