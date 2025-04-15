@@ -89,7 +89,7 @@ jobs:
             tmp="${tmp%\"}"
             IFS="\\\\" read -ra subdirs <<< "$tmp"
             subdirs_size=${#subdirs[@]}
-            cp $tmp \"$build_path/${subdirs[$subdirs_size-1]}\"
+            cp $tmp $build_path/${subdirs[$subdirs_size-1]}
           done
 
           cd $build_path
