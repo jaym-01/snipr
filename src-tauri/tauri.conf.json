@@ -33,11 +33,6 @@
     "externalBin": [
       "binaries/ffmpeg",
       "binaries/ffprobe"
-    ],
-    "windows": {
-      "webviewInstallMode": {
-        "type": "offlineInstaller"
-      }
-    }
+    ]
   }
 }
