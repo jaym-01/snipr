@@ -67,7 +67,7 @@ jobs:
           tag_name: ${{ steps.app-build.outputs.appVersion }}
           repository: jaym-01/snipr-release
           files: |
-            find D:/a/snipr/snipr/src-tauri/target/release/bundle -type f
+            D:/a/snipr/snipr/src-tauri/target/release/bundle/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
 
