@@ -37,7 +37,7 @@ async fn cut_silences(
         min_sil,
         padding,
         threshold,
-    );
+    )?;
 
     if audio_data.is_none() {
         return Err("Error while removing silences".to_string());

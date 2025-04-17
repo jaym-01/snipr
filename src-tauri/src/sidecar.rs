@@ -1,10 +1,14 @@
 use tauri_plugin_shell::{process::CommandEvent, ShellExt};
 
-pub async fn run_side_car(app_handle: &tauri::AppHandle, program: &str, args: &[&str]) -> Vec<u8> {
+pub async fn run_side_car(
+    app_handle: &tauri::AppHandle,
+    program: &str,
+    args: &[&str],
+) -> Result<Vec<u8>, String> {
     let sidecar = app_handle
         .shell()
         .sidecar(program)
-        .unwrap()
+        .map_err(|_| "Failed read/write file".to_string())?
         .args(args)
         .set_raw_out(true);
 
@@ -17,5 +21,5 @@ pub async fn run_side_car(app_handle: &tauri::AppHandle, program: &str, args: &[
         }
     }
 
-    return raw_data;
+    return Ok(raw_data);
 }

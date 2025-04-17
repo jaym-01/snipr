@@ -23,7 +23,7 @@
 [data-theme="dark"] {
   --primary: #333333;
   --secondary: #f1efeb;
-  --error: #d34242;
+  --error: #ff4c4c;
 
   color: var(--secondary);
   background-color: var(--primary);

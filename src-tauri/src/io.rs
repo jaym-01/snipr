@@ -13,13 +13,10 @@ pub async fn decode(
     app_handle: &tauri::AppHandle,
     state: &AppState<'_>,
     input_file: &str,
-) -> Result<models::AudioData, std::io::Error> {
+) -> Result<models::AudioData, String> {
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Operation cancelled",
-        ));
+        return Err("Operation cancelled".to_string());
     }
 
     send_progress(&app_handle, 5);
@@ -38,7 +35,7 @@ pub async fn decode(
             input_file,
         ],
     )
-    .await;
+    .await?;
 
     send_progress(&app_handle, 10);
 
@@ -48,10 +45,7 @@ pub async fn decode(
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Operation cancelled",
-        ));
+        return Err("Operation cancelled".to_string());
     }
 
     let channels = output_str
@@ -76,10 +70,7 @@ pub async fn decode(
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Operation cancelled",
-        ));
+        return Err("Operation cancelled".to_string());
     }
 
     send_progress(&app_handle, 15);
@@ -90,16 +81,13 @@ pub async fn decode(
         "ffmpeg",
         &["-i", input_file, "-f", "s16le", "-acodec", "pcm_s16le", "-"],
     )
-    .await;
+    .await?;
 
     send_progress(&app_handle, 30);
 
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Operation cancelled",
-        ));
+        return Err("Operation cancelled".to_string());
     }
 
     Ok(models::AudioData {
@@ -113,12 +101,12 @@ pub async fn encode(
     app_handle: tauri::AppHandle,
     data: &models::AudioData,
     path: &str,
-) -> Result<(), std::io::Error> {
+) -> Result<(), String> {
     // run side car to convert the PCM data to the desired format
     let sidecar = app_handle
         .shell()
         .sidecar("ffmpeg")
-        .unwrap()
+        .map_err(|_| "Failed to write file".to_string())?
         .args([
             "-y",
             "-f",
@@ -135,7 +123,9 @@ pub async fn encode(
 
     let (mut rx, mut child) = sidecar.spawn().expect("Failed to spawn sidecar");
 
-    child.write(&data.data).unwrap();
+    child
+        .write(&data.data)
+        .map_err(|_| "Failed to write file".to_string())?;
     drop(child);
 
     while rx.recv().await.is_some() {}

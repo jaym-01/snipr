@@ -17,19 +17,25 @@ function saveFile() {
 }
 
 export default function Home() {
-  const [state, setState] = useState<ScreenState>(ScreenState.DONE);
+  const [state, setState] = useState<ScreenState>(ScreenState.IDLE);
   const [file, setFile] = useState<string | null>(null);
   const [savedFile, setSavedFile] = useState<string | null>(null);
   const [disableCancel, setDisableCancel] = useState(false);
   const [curProgress, setProgress] = useState(0);
 
+  const [error, setError] = useState<string | null>(null);
+
   const unlistenRefs = useRef<UnlistenFn[]>([]);
 
   const invokeSaveFile = async function (file_: string | null) {
     if (file_) {
+      setError(null);
       setSavedFile(file_);
       setState(ScreenState.SAVE_LOADING);
-      await invoke("save_file", { fileDest: file_ });
+      const result: string | null = await invoke("save_file", {
+        fileDest: file_,
+      });
+      setError(result);
       setState(ScreenState.DONE);
     }
   };
@@ -38,37 +44,46 @@ export default function Home() {
     file_: string,
     select_save: boolean = true
   ) {
-    setState(ScreenState.LOADING);
-    setDisableCancel(false);
-    setProgress(0);
-
-    let save_file_: string | null = null;
-
-    if (select_save) {
-      save_file_ = await saveFile();
-    }
-    setSavedFile(save_file_);
-
-    let cutProps: CutProps | null = null;
     try {
-      cutProps = new CutProps();
-      await cutProps.load();
-    } catch {}
+      setState(ScreenState.LOADING);
+      setDisableCancel(false);
+      setProgress(0);
+      setError(null);
 
-    console.log(cutProps);
+      let save_file_: string | null = null;
 
-    if (
-      (await invoke("cut_silences", {
+      if (select_save) {
+        save_file_ = await saveFile();
+      }
+      setSavedFile(save_file_);
+
+      let cutProps: CutProps | null = null;
+      try {
+        cutProps = new CutProps();
+        await cutProps.load();
+      } catch {}
+
+      const result: string | null = await invoke("cut_silences", {
         fileDest: file_,
         minSil: cutProps?.minSilence,
         padding: cutProps?.padding,
         threshold: cutProps?.threshold,
-      })) === null
-    ) {
-      setState(ScreenState.DONE);
-      await invokeSaveFile(save_file_);
-    } else {
-      setState(ScreenState.IDLE);
+      });
+
+      console.log("result", result);
+
+      if (result === null) {
+        setState(ScreenState.DONE);
+        await invokeSaveFile(save_file_);
+      } else {
+        setState(ScreenState.IDLE);
+        setError(result);
+        setSavedFile(null);
+        setFile(null);
+      }
+    } catch (e) {
+      console.log("here");
+      console.error(e);
     }
   };
 
@@ -97,8 +112,9 @@ export default function Home() {
     await invoke("cancel");
     setFile(null);
     setSavedFile(null);
-    setState(ScreenState.IDLE);
     setDisableCancel(false);
+    setError(null);
+    setState(ScreenState.IDLE);
   };
 
   useEffect(() => {
@@ -208,6 +224,8 @@ export default function Home() {
             {isLoadingScreen ? "Saving" : "Saved"} to: {savedFile}
           </small>
         )}
+
+        {error && <small className="error">{error}</small>}
       </div>
     </main>
   );

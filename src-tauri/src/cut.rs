@@ -2,7 +2,8 @@ use crate::io::cancel_cleanup;
 use crate::models::{self, AppState, AudioData};
 use crate::progress::send_progress;
 
-// TODO: add padding to cuts
+const GENERIC_CUT_ERROR: &str = "Failed to cut samples";
+
 pub fn remove_silences(
     app_handle: tauri::AppHandle,
     state: &AppState<'_>,
@@ -10,7 +11,7 @@ pub fn remove_silences(
     min_sil: Option<f64>,
     padding: Option<f64>,
     threshold: Option<u16>,
-) -> Option<models::AudioData> {
+) -> Result<Option<models::AudioData>, String> {
     // min number of samples before it can be considered a silence
     // take into account the 2 bytes for each sample and number of channels
     let buffer_size =
@@ -23,7 +24,7 @@ pub fn remove_silences(
     let mut i: usize = 0;
     let mut start = -1;
 
-    let mut new_samples = Vec::new();
+    let mut new_samples: Vec<u8> = Vec::new();
 
     // this is the base number for updating the progress bar
     let increment = data.data.len() / 6;
@@ -35,16 +36,21 @@ pub fn remove_silences(
         for j in 0..(data.channels as usize) {
             // offset by 2 bytes
             let index = i + j * 2;
-            max_amp = max_amp
-                .max(i16::from_le_bytes([data.data[index], data.data[index + 1]]).unsigned_abs());
+            max_amp = max_amp.max(
+                i16::from_le_bytes([
+                    *data.data.get(index).ok_or(GENERIC_CUT_ERROR)?,
+                    *data.data.get(index + 1).ok_or(GENERIC_CUT_ERROR)?,
+                ])
+                .unsigned_abs(),
+            );
         }
 
         // add samples the final samples array
         for j in 0..(data.channels as usize) {
             // offset by 2 bytes
             let index = i + j * 2;
-            new_samples.push(data.data[index]);
-            new_samples.push(data.data[index + 1]);
+            new_samples.push(*data.data.get(index).ok_or(GENERIC_CUT_ERROR)?);
+            new_samples.push(*data.data.get(index + 1).ok_or(GENERIC_CUT_ERROR)?);
         }
 
         // index moves the current next sample - start of the next iteration
@@ -76,7 +82,7 @@ pub fn remove_silences(
         if i % 50 == 0 {
             if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
                 cancel_cleanup(state);
-                return Option::None;
+                return Ok(Option::None);
             }
         }
 
@@ -86,9 +92,9 @@ pub fn remove_silences(
         }
     }
 
-    return Option::Some(AudioData {
+    return Ok(Option::Some(AudioData {
         channels: data.channels,
         sample_rate: data.sample_rate,
         data: new_samples,
-    });
+    }));
 }
