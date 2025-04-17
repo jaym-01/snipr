@@ -1,4 +1,3 @@
-// src/context/ThemeContext.tsx
 import {
   createContext,
   ReactNode,
@@ -65,11 +64,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadTheme().then((storedTheme) => {
-      console.log("here", storedTheme);
       setTheme(storedTheme);
       document.documentElement.setAttribute(
         "data-theme",
-        resolveTheme(storedTheme),
+        resolveTheme(storedTheme)
       );
     });
   }, []);
@@ -81,7 +79,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme(nextTheme);
     document.documentElement.setAttribute(
       "data-theme",
-      resolveTheme(nextTheme),
+      resolveTheme(nextTheme)
     );
     await saveTheme(nextTheme);
   };

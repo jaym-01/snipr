@@ -3,7 +3,7 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { Laptop, Loader, Moon, Music, Sun, X } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import { ScreenState } from "@/states.ts";
+import { ScreenState } from "@/utils/states.ts";
 import ProgressBar from "../ProgressBar.tsx";
 import { CutProps } from "@/utils/settings.ts";
 import { useTheme } from "@/utils/theme.tsx";
@@ -17,7 +17,7 @@ function saveFile() {
 }
 
 export default function Home() {
-  const [state, setState] = useState<ScreenState>(ScreenState.IDLE);
+  const [state, setState] = useState<ScreenState>(ScreenState.DONE);
   const [file, setFile] = useState<string | null>(null);
   const [savedFile, setSavedFile] = useState<string | null>(null);
   const [disableCancel, setDisableCancel] = useState(false);
@@ -36,7 +36,7 @@ export default function Home() {
 
   const runProcess = async function (
     file_: string,
-    select_save: boolean = true,
+    select_save: boolean = true
   ) {
     setState(ScreenState.LOADING);
     setDisableCancel(false);
@@ -58,12 +58,12 @@ export default function Home() {
     console.log(cutProps);
 
     if (
-      await invoke("cut_silences", {
+      (await invoke("cut_silences", {
         fileDest: file_,
         minSil: cutProps?.minSilence,
         padding: cutProps?.padding,
         threshold: cutProps?.threshold,
-      }) === null
+      })) === null
     ) {
       setState(ScreenState.DONE);
       await invokeSaveFile(save_file_);
@@ -108,15 +108,16 @@ export default function Home() {
         (event) => {
           const allPaths = event.payload.paths;
           if (
-            allPaths && allPaths.length > 0 &&
+            allPaths &&
+            allPaths.length > 0 &&
             extensionFilters.includes(
-              allPaths[0].substring(allPaths[0].length - 3),
+              allPaths[0].substring(allPaths[0].length - 3)
             )
           ) {
             setFile(event.payload.paths[0]);
             runProcess(event.payload.paths[0]);
           }
-        },
+        }
       );
 
       unlistenRefs.current.push(unlistenDragDrop);
@@ -125,7 +126,7 @@ export default function Home() {
         "cut-progress",
         (event) => {
           setProgress(event.payload);
-        },
+        }
       );
 
       unlistenRefs.current.push(unlistenCutProgress);
@@ -141,39 +142,28 @@ export default function Home() {
 
   const { theme, toggleTheme } = useTheme();
 
+  const isLoadingScreen =
+    state === ScreenState.LOADING || state === ScreenState.SAVE_LOADING;
+
   return (
     <main className="container">
       <button
         onClick={async () => await toggleTheme()}
         className="theme-toggle"
       >
-        {theme === "dark"
-          ? <Moon />
-          : (theme === "light" ? <Sun /> : <Laptop />)}
+        {theme === "dark" ? <Moon /> : theme === "light" ? <Sun /> : <Laptop />}
       </button>
       <div className="main-wrapper">
         <div
           className={`title-content ${
-            state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING
-              ? "title-content-h"
-              : ""
+            !isLoadingScreen ? "title-content-h" : ""
           }`}
         >
-          <Music
-            className={state !== ScreenState.LOADING &&
-                state !== ScreenState.SAVE_LOADING
-              ? "title"
-              : "title-proc"}
-          />
+          <Music className={!isLoadingScreen ? "titlet" : "title-proc"} />
           <h2
-            className={state !== ScreenState.LOADING &&
-                state !== ScreenState.SAVE_LOADING
-              ? "title"
-              : "title-proc"}
-            onClick={state !== ScreenState.LOADING &&
-                state !== ScreenState.SAVE_LOADING
-              ? handleOpenFile
-              : () => undefined}
+            className={!isLoadingScreen ? "titlet" : "title-proc"}
+            onClick={!isLoadingScreen ? handleOpenFile : () => undefined}
+            style={{ flex: 1 }}
           >
             Click here or drag to open file
           </h2>
@@ -184,43 +174,38 @@ export default function Home() {
       <div className="control-wrapper">
         {file && <small className="title-proc">{file}</small>}
 
-        {state === ScreenState.LOADING &&
-          (
-            <button
-              type="button"
-              className="cancel"
-              onClick={handleCancel}
-              disabled={disableCancel}
-              style={{
-                opacity: disableCancel ? 0.6 : 1,
-              }}
-            >
-              <X />
-            </button>
-          )}
+        {state === ScreenState.LOADING && (
+          <button
+            type="button"
+            className="cancel"
+            onClick={handleCancel}
+            disabled={disableCancel}
+            style={{
+              opacity: disableCancel ? 0.6 : 1,
+            }}
+          >
+            <X />
+          </button>
+        )}
 
-        {(state === ScreenState.DONE || state === ScreenState.SAVE_LOADING) &&
-          (
-            <button
-              type="button"
-              className="save"
-              disabled={state === ScreenState.SAVE_LOADING}
-              onClick={handleSaveFile}
-              style={{
-                opacity: state === ScreenState.SAVE_LOADING ? 0.6 : 1,
-              }}
-            >
-              Save Audio
-              {state === ScreenState.SAVE_LOADING &&
-                <Loader className="spin" />}
-            </button>
-          )}
+        {(state === ScreenState.DONE || state === ScreenState.SAVE_LOADING) && (
+          <button
+            type="button"
+            className="save"
+            disabled={state === ScreenState.SAVE_LOADING}
+            onClick={handleSaveFile}
+            style={{
+              opacity: state === ScreenState.SAVE_LOADING ? 0.6 : 1,
+            }}
+          >
+            Save Audio
+            {state === ScreenState.SAVE_LOADING && <Loader className="spin" />}
+          </button>
+        )}
 
         {savedFile && (
           <small className="save-txt">
-            {state === ScreenState.LOADING || state === ScreenState.SAVE_LOADING
-              ? "Saving"
-              : "Saved"} to: {savedFile}
+            {isLoadingScreen ? "Saving" : "Saved"} to: {savedFile}
           </small>
         )}
       </div>
