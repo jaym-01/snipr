@@ -74,7 +74,6 @@ jobs:
           repository: jaym-01/snipr-release
           files: |
             D:/a/snipr/snipr/src-tauri/target/release/bundle/*
-            D:/a/snipr/snipr/src-tauri/target/release/bundle/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
 
