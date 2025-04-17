@@ -1,8 +1,6 @@
 use tauri_plugin_updater::UpdaterExt;
 
 pub async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
-    println!("before checking for update");
-
     if let Some(update) = app.updater()?.check().await? {
         println!("update found");
         let mut downloaded = 0;
