@@ -1,11 +1,8 @@
-import ReactDOM from "react-dom/client";
-import "@/App.css";
 import "@/Settings.css";
 import { InputHTMLAttributes, useEffect, useRef, useState } from "react";
 import { CutProps } from "@/utils/settings.ts";
-import App from "@/App.tsx";
 
-function Settings() {
+export default function Settings() {
   const [tmpSettings, setTmpSettings] = useState<CutProps>(new CutProps());
   const [saveEnabled, setSaveEnabled] = useState(false);
   const [resetEnable, setResetEnabled] = useState(false);
@@ -16,16 +13,16 @@ function Settings() {
     // compares it to the current saved settings
     // sets the save enable
     Object.entries(compare).some(
-        ([k, v]) => v !== settings.current[k as keyof CutProps],
-      )
+      ([k, v]) => v !== settings.current[k as keyof CutProps]
+    )
       ? setSaveEnabled(true)
       : setSaveEnabled(false);
 
     // compares it to the default settings
     // sets the reset enable
     Object.entries(compare).some(
-        ([k, v]) => v !== (new CutProps())[k as keyof CutProps],
-      )
+      ([k, v]) => v !== new CutProps()[k as keyof CutProps]
+    )
       ? setResetEnabled(true)
       : setResetEnabled(false);
   };
@@ -42,14 +39,15 @@ function Settings() {
       if (key === "minSilence") {
         if (typeof value === "number" && value <= 2 * tmpSettings.padding) {
           setError(
-            "Minimum silence duration must be at least 2 times greater than padding",
+            "Minimum silence duration must be at least 2 times greater than padding"
           );
           setTimeout(() => setError(null), 5000);
           return;
         }
       } else if (key === "padding") {
         if (
-          typeof value === "number" && value >= 0.5 * tmpSettings.minSilence
+          typeof value === "number" &&
+          value >= 0.5 * tmpSettings.minSilence
         ) {
           setError("Padding must be at most half the minimum silence duration");
           setTimeout(() => setError(null), 5000);
@@ -156,9 +154,3 @@ function NumInput({
     </div>
   );
 }
-
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <App>
-    <Settings />
-  </App>,
-);

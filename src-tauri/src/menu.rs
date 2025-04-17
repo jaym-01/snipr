@@ -31,7 +31,7 @@ pub fn setup_menu(app: &tauri::App) -> Result<(), String> {
             if let Some(window) = app_handle.get_webview_window("settings") {
                 window.show().unwrap();
             } else {
-                let webview_url = tauri::WebviewUrl::App("settings.html".into());
+                let webview_url = tauri::WebviewUrl::App("index.html".into());
                 tauri::WebviewWindowBuilder::new(
                     app_handle,
                     MenuOption::Settings.text(),

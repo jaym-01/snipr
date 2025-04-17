@@ -3,7 +3,7 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { Laptop, Loader, Moon, Music, Sun, X } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
-import { ScreenState } from "@/states.ts";
+import { ScreenState } from "@/utils/states.ts";
 import ProgressBar from "../ProgressBar.tsx";
 import { CutProps } from "@/utils/settings.ts";
 import { useTheme } from "@/utils/theme.tsx";
@@ -23,52 +23,67 @@ export default function Home() {
   const [disableCancel, setDisableCancel] = useState(false);
   const [curProgress, setProgress] = useState(0);
 
+  const [error, setError] = useState<string | null>(null);
+
   const unlistenRefs = useRef<UnlistenFn[]>([]);
 
   const invokeSaveFile = async function (file_: string | null) {
     if (file_) {
+      setError(null);
       setSavedFile(file_);
       setState(ScreenState.SAVE_LOADING);
-      await invoke("save_file", { fileDest: file_ });
+      const result: string | null = await invoke("save_file", {
+        fileDest: file_,
+      });
+      setError(result);
       setState(ScreenState.DONE);
     }
   };
 
   const runProcess = async function (
     file_: string,
-    select_save: boolean = true,
+    select_save: boolean = true
   ) {
-    setState(ScreenState.LOADING);
-    setDisableCancel(false);
-    setProgress(0);
-
-    let save_file_: string | null = null;
-
-    if (select_save) {
-      save_file_ = await saveFile();
-    }
-    setSavedFile(save_file_);
-
-    let cutProps: CutProps | null = null;
     try {
-      cutProps = new CutProps();
-      await cutProps.load();
-    } catch {}
+      setState(ScreenState.LOADING);
+      setDisableCancel(false);
+      setProgress(0);
+      setError(null);
 
-    console.log(cutProps);
+      let save_file_: string | null = null;
 
-    if (
-      await invoke("cut_silences", {
+      if (select_save) {
+        save_file_ = await saveFile();
+      }
+      setSavedFile(save_file_);
+
+      let cutProps: CutProps | null = null;
+      try {
+        cutProps = new CutProps();
+        await cutProps.load();
+      } catch {}
+
+      const result: string | null = await invoke("cut_silences", {
         fileDest: file_,
         minSil: cutProps?.minSilence,
         padding: cutProps?.padding,
         threshold: cutProps?.threshold,
-      }) === null
-    ) {
-      setState(ScreenState.DONE);
-      await invokeSaveFile(save_file_);
-    } else {
-      setState(ScreenState.IDLE);
+      });
+
+      console.log("result", result);
+
+      if (result === null) {
+        setState(ScreenState.DONE);
+        await invokeSaveFile(save_file_);
+      } else {
+        setState(ScreenState.IDLE);
+        setError(result);
+        setSavedFile(null);
+        setFile(null);
+      }
+    } catch (e) {
+      console.log("here");
+      console.error(e);
     }
   };
 
@@ -97,8 +112,9 @@ export default function Home() {
     await invoke("cancel");
     setFile(null);
     setSavedFile(null);
-    setState(ScreenState.IDLE);
     setDisableCancel(false);
+    setError(null);
+    setState(ScreenState.IDLE);
   };
 
   useEffect(() => {
@@ -108,15 +124,16 @@ export default function Home() {
         (event) => {
           const allPaths = event.payload.paths;
           if (
-            allPaths && allPaths.length > 0 &&
+            allPaths &&
+            allPaths.length > 0 &&
             extensionFilters.includes(
-              allPaths[0].substring(allPaths[0].length - 3),
+              allPaths[0].substring(allPaths[0].length - 3)
             )
           ) {
             setFile(event.payload.paths[0]);
             runProcess(event.payload.paths[0]);
           }
-        },
+        }
       );
 
       unlistenRefs.current.push(unlistenDragDrop);
@@ -125,7 +142,7 @@ export default function Home() {
         "cut-progress",
         (event) => {
           setProgress(event.payload);
-        },
+        }
       );
 
       unlistenRefs.current.push(unlistenCutProgress);
@@ -141,39 +158,28 @@ export default function Home() {
 
   const { theme, toggleTheme } = useTheme();
 
+  const isLoadingScreen =
+    state === ScreenState.LOADING || state === ScreenState.SAVE_LOADING;
+
   return (
     <main className="container">
       <button
         onClick={async () => await toggleTheme()}
         className="theme-toggle"
       >
-        {theme === "dark"
-          ? <Moon />
-          : (theme === "light" ? <Sun /> : <Laptop />)}
+        {theme === "dark" ? <Moon /> : theme === "light" ? <Sun /> : <Laptop />}
       </button>
       <div className="main-wrapper">
         <div
           className={`title-content ${
-            state !== ScreenState.LOADING && state !== ScreenState.SAVE_LOADING
-              ? "title-content-h"
-              : ""
+            !isLoadingScreen ? "title-content-h" : ""
           }`}
         >
-          <Music
-            className={state !== ScreenState.LOADING &&
-                state !== ScreenState.SAVE_LOADING
-              ? "title"
-              : "title-proc"}
-          />
+          <Music className={!isLoadingScreen ? "titlet" : "title-proc"} />
           <h2
-            className={state !== ScreenState.LOADING &&
-                state !== ScreenState.SAVE_LOADING
-              ? "title"
-              : "title-proc"}
-            onClick={state !== ScreenState.LOADING &&
-                state !== ScreenState.SAVE_LOADING
-              ? handleOpenFile
-              : () => undefined}
+            className={!isLoadingScreen ? "titlet" : "title-proc"}
+            onClick={!isLoadingScreen ? handleOpenFile : () => undefined}
+            style={{ flex: 1 }}
           >
             Click here or drag to open file
           </h2>
@@ -184,45 +190,42 @@ export default function Home() {
       <div className="control-wrapper">
         {file && <small className="title-proc">{file}</small>}
 
-        {state === ScreenState.LOADING &&
-          (
-            <button
-              type="button"
-              className="cancel"
-              onClick={handleCancel}
-              disabled={disableCancel}
-              style={{
-                opacity: disableCancel ? 0.6 : 1,
-              }}
-            >
-              <X />
-            </button>
-          )}
+        {state === ScreenState.LOADING && (
+          <button
+            type="button"
+            className="cancel"
+            onClick={handleCancel}
+            disabled={disableCancel}
+            style={{
+              opacity: disableCancel ? 0.6 : 1,
+            }}
+          >
+            <X />
+          </button>
+        )}
 
-        {(state === ScreenState.DONE || state === ScreenState.SAVE_LOADING) &&
-          (
-            <button
-              type="button"
-              className="save"
-              disabled={state === ScreenState.SAVE_LOADING}
-              onClick={handleSaveFile}
-              style={{
-                opacity: state === ScreenState.SAVE_LOADING ? 0.6 : 1,
-              }}
-            >
-              Save Audio
-              {state === ScreenState.SAVE_LOADING &&
-                <Loader className="spin" />}
-            </button>
-          )}
+        {(state === ScreenState.DONE || state === ScreenState.SAVE_LOADING) && (
+          <button
+            type="button"
+            className="save"
+            disabled={state === ScreenState.SAVE_LOADING}
+            onClick={handleSaveFile}
+            style={{
+              opacity: state === ScreenState.SAVE_LOADING ? 0.6 : 1,
+            }}
+          >
+            Save Audio
+            {state === ScreenState.SAVE_LOADING && <Loader className="spin" />}
+          </button>
+        )}
 
         {savedFile && (
           <small className="save-txt">
-            {state === ScreenState.LOADING || state === ScreenState.SAVE_LOADING
-              ? "Saving"
-              : "Saved"} to: {savedFile}
+            {isLoadingScreen ? "Saving" : "Saved"} to: {savedFile}
           </small>
         )}
+
+        {error && <small className="error">{error}</small>}
       </div>
     </main>
   );

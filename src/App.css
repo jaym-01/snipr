@@ -23,7 +23,7 @@
 [data-theme="dark"] {
   --primary: #333333;
   --secondary: #f1efeb;
-  --error: #d34242;
+  --error: #ff4c4c;
 
   color: var(--secondary);
   background-color: var(--primary);
@@ -79,7 +79,7 @@ html {
   text-shadow: 4px 4px 7px rgba(51, 51, 51, 0.3);
 }
 
-.title {
+.titlet {
   color: var(--secondary);
 }
 
