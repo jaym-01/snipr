@@ -4,6 +4,7 @@ mod menu;
 mod models;
 mod progress;
 mod sidecar;
+mod update;
 
 use io::decode;
 use std::sync::{
@@ -11,6 +12,7 @@ use std::sync::{
     Arc,
 };
 use tokio::sync::Mutex;
+use update::update;
 
 #[tauri::command]
 async fn cut_silences(
@@ -87,6 +89,13 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
             crate::menu::setup_menu(&app).unwrap();
+
+            let handle = app.handle().clone();
+            println!("before spawn");
+            tauri::async_runtime::spawn(async move {
+                update(handle).await.unwrap();
+            });
+
             Ok(())
         })
         .plugin(tauri_plugin_shell::init())
