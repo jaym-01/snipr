@@ -60,6 +60,11 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+      
+      - name: Create static json file
+        shell: bash
+        run: |
+          deno run --allow-read --allow-write .github/workflows/gen_meta_data.ts --bundle-path src-tauri/target/release/bundle --version ${{ steps.app-build.outputs.appVersion }}
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
@@ -68,6 +73,7 @@ jobs:
           repository: jaym-01/snipr-release
           files: |
             D:/a/snipr/snipr/src-tauri/target/release/bundle/**/*
+            D:/a/snipr/snipr/src-tauri/target/release/bundle/latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
 
