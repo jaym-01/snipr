@@ -1,31 +1,28 @@
-from typing import List
-import torchaudio
-import torch
+from typing import List, Tuple
+import torchaudio  # type: ignore
+import torch  # type: ignore
 import numpy as np
-import whisper_timestamped as whisper
+import numpy.typing as npt
+import whisper_timestamped as whisper  # type: ignore
 
 
-class Word:
-    def __init__(self, word, start, end):
-        self.word = word
-        self.start = start
-        self.end = end
-
-    def __repr__(self):
-        return f"{self.word} | {self.start} | {self.end}"
-
-
-def get_words(result):
-    words: List[Word] = []
+def get_words(result) -> List[Tuple[str, float, float]]:
+    # convert all data to Word objects
+    words = []
 
     for segment in result["segments"]:
         for word in segment["words"]:
-            words.append(Word(word["text"], word["start"], word["end"]))
+            words.append((word["text"], word["start"], word["end"]))
 
     return words
 
 
-def resample(audio, sample_rate):
+def resample(audio: npt.NDArray[np.float32], sample_rate: int, channels: int):
+    # compress to a single channel
+    if channels != 1:
+        audio = audio.reshape(-1, channels).mean(axis=1)
+
+    # resample to 16kHz
     if sample_rate != 16000:
         resampler = torchaudio.transforms.Resample(
             orig_freq=sample_rate, new_freq=16000)
@@ -36,8 +33,9 @@ def resample(audio, sample_rate):
         return torch.tensor(audio).numpy().astype(np.float32)
 
 
-def transcribe(audio, sample_rate):
-    audio_resampled = resample(audio, sample_rate)
+def transcribe(audio: List[int], sample_rate: int, channels: int) -> List[Tuple[str, float, float]]:
+    naudio = np.array(audio, dtype=np.float32)
+    audio_resampled = resample(naudio, sample_rate, channels)
     model = whisper.load_model(
         "tiny", device="cuda" if torch.cuda.is_available() else "cpu")
     result = whisper.transcribe(model, audio_resampled, language="en")

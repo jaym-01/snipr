@@ -1,6 +1,6 @@
-use crate::io::cancel_cleanup;
+use super::io::cancel_cleanup;
+use super::progress::send_progress;
 use crate::models::{self, AppState, AudioData};
-use crate::progress::send_progress;
 
 const GENERIC_CUT_ERROR: &str = "Failed to cut samples";
 

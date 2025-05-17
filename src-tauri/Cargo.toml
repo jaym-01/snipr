@@ -27,5 +27,9 @@ tauri-plugin-shell = "2"
 tokio = { version = "1.44.1", features = ["full"] }
 tauri-plugin-store = "2"
 
+[dependencies.pyo3]
+version = "0.24.2"
+features = ["auto-initialize"]
+
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"

@@ -1,18 +1,18 @@
-mod cut;
-mod io;
-mod menu;
+mod media_processing;
 mod models;
-mod progress;
-mod sidecar;
-mod update;
+mod system;
 
-use io::decode;
+use media_processing::{
+    cut::remove_silences,
+    io::{decode, encode},
+    transcribe::{transcribe_speech, Word},
+};
 use std::sync::{
     atomic::{AtomicBool, Ordering::Relaxed},
     Arc,
 };
+use system::{menu::setup_menu, update::update};
 use tokio::sync::Mutex;
-use update::update;
 
 #[tauri::command]
 async fn cut_silences(
@@ -30,7 +30,7 @@ async fn cut_silences(
         .await
         .map_err(|_| "Failed to decode file".to_string())?;
 
-    let audio_data = cut::remove_silences(
+    let audio_data = remove_silences(
         app_handle,
         app_state,
         decoded_data,
@@ -75,7 +75,7 @@ async fn save_file(
     if l_audio_data.is_none() {
         Err("No audio data to save".to_string())
     } else {
-        io::encode(app_handle, l_audio_data.as_ref().unwrap(), &file_dest)
+        encode(app_handle, l_audio_data.as_ref().unwrap(), &file_dest)
             .await
             .map_err(|_| "Failed to saved file".to_string())?;
         Ok(())
@@ -83,17 +83,32 @@ async fn save_file(
 }
 
 #[tauri::command]
-async fn transcribe() -> Result<String, String> {
-    Ok("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.".to_string())
+async fn transcribe(
+    app_handle: tauri::AppHandle,
+    state: models::AppState<'_>,
+    file_dest: String,
+) -> Result<Vec<Word>, String> {
+    let audio = decode(&app_handle, &state, &file_dest)
+        .await
+        .map_err(|_| "Failed to decode file".to_string())?;
+
+    Ok(transcribe_speech(&audio).map_err(|_| "Failed to transcribe file".to_string())?)
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
+// #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_shell::init())
+        .manage(models::CutState {
+            cancelled: Arc::new(AtomicBool::new(false)),
+            audio_data: Arc::new(Mutex::new(None)),
+        })
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            crate::menu::setup_menu(&app).unwrap();
+            setup_menu(&app).unwrap();
 
             let handle = app.handle().clone();
             println!("before spawn");
@@ -103,13 +118,6 @@ pub fn run() {
 
             Ok(())
         })
-        .plugin(tauri_plugin_shell::init())
-        .manage(models::CutState {
-            cancelled: Arc::new(AtomicBool::new(false)),
-            audio_data: Arc::new(Mutex::new(None)),
-        })
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             cut_silences,
             cancel,

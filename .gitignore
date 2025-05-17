@@ -30,3 +30,5 @@ libraries
 .env
 
 .venv
+
+.mypy_cache
