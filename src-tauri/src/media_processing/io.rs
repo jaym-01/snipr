@@ -3,6 +3,23 @@ use crate::models::{self, AppState};
 use crate::system::sidecar::run_side_car;
 use tauri_plugin_shell::ShellExt;
 
+#[tauri::command]
+pub async fn save_file(
+    app_handle: tauri::AppHandle,
+    state: models::AppState<'_>,
+    file_dest: String,
+) -> Result<(), String> {
+    let l_audio_data = state.audio_data.lock().await;
+    if l_audio_data.is_none() {
+        Err("No audio data to save".to_string())
+    } else {
+        encode(app_handle, l_audio_data.as_ref().unwrap(), &file_dest)
+            .await
+            .map_err(|_| "Failed to saved file".to_string())?;
+        Ok(())
+    }
+}
+
 pub fn cancel_cleanup(state: &AppState<'_>) {
     state
         .cancelled

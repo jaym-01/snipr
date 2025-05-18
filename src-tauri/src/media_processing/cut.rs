@@ -1,6 +1,59 @@
 use super::io::cancel_cleanup;
 use super::progress::send_progress;
+use crate::media_processing::io::decode;
 use crate::models::{self, AppState, AudioData};
+use std::sync::atomic::Ordering::Relaxed;
+
+#[tauri::command]
+pub async fn cut_silences(
+    app_handle: tauri::AppHandle,
+    state: models::AppState<'_>,
+    file_dest: String,
+    min_sil: Option<f64>,
+    padding: Option<f64>,
+    threshold: Option<u16>,
+) -> Result<(), String> {
+    let app_state = &state;
+    state.cancelled.store(false, Relaxed);
+
+    let decoded_data = decode(&app_handle, app_state, &file_dest)
+        .await
+        .map_err(|_| "Failed to decode file".to_string())?;
+
+    let audio_data = remove_silences(
+        app_handle,
+        app_state,
+        decoded_data,
+        min_sil,
+        padding,
+        threshold,
+    )?;
+
+    if audio_data.is_none() {
+        return Err("Error while removing silences".to_string());
+    } else {
+        let mut l_audio_data = app_state.audio_data.lock().await;
+        *l_audio_data = audio_data;
+        Ok(())
+    }
+}
+
+#[tauri::command]
+pub async fn cancel(state: models::AppState<'_>) -> Result<(), String> {
+    state.cancelled.store(true, Relaxed);
+
+    let mut i = 0;
+
+    while state.cancelled.load(Relaxed) {
+        std::thread::sleep(std::time::Duration::from_millis(500));
+        i += 1;
+        if i > 10 {
+            return Err("Failed to stop process".to_string());
+        }
+    }
+
+    Ok(())
+}
 
 const GENERIC_CUT_ERROR: &str = "Failed to cut samples";
 

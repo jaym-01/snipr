@@ -33,11 +33,14 @@ def resample(audio: npt.NDArray[np.float32], sample_rate: int, channels: int):
         return torch.tensor(audio).numpy().astype(np.float32)
 
 
-def transcribe(audio: List[int], sample_rate: int, channels: int) -> List[Tuple[str, float, float]]:
+def transcribe(audio: List[int], sample_rate: int, channels: int, model_type: str) -> List[Tuple[str, float, float]]:
     naudio = np.array(audio, dtype=np.float32)
     audio_resampled = resample(naudio, sample_rate, channels)
+
     model = whisper.load_model(
-        "tiny", device="cuda" if torch.cuda.is_available() else "cpu")
+        "turbo" if model_type == "turbo" else "tiny",
+        device="cuda" if torch.cuda.is_available() else "cpu"
+    )
     result = whisper.transcribe(model, audio_resampled, language="en")
     words = get_words(result)
     return words
