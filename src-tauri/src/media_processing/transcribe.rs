@@ -14,20 +14,43 @@ pub struct Word {
     pub end: f64,
 }
 
+enum TranscribeModel {
+    Tiny,
+    Turbo,
+}
+
+impl TranscribeModel {
+    fn to_str(&self) -> &str {
+        match self {
+            TranscribeModel::Tiny => "tiny",
+            TranscribeModel::Turbo => "turbo",
+        }
+    }
+}
+
 #[tauri::command]
 pub async fn transcribe(
     app_handle: tauri::AppHandle,
     state: models::AppState<'_>,
     file_dest: String,
+    transcribe_model: Option<String>,
 ) -> Result<Vec<Word>, String> {
     let audio = decode(&app_handle, &state, &file_dest)
         .await
         .map_err(|_| "Failed to decode file".to_string())?;
 
-    Ok(transcribe_speech(&audio).map_err(|_| "Failed to transcribe file".to_string())?)
+    let tmodel = match transcribe_model {
+        None => TranscribeModel::Tiny,
+        Some(model) => match model.as_str() {
+            "turbo" => TranscribeModel::Turbo,
+            _ => TranscribeModel::Tiny,
+        },
+    };
+
+    Ok(transcribe_speech(&audio, tmodel).map_err(|_| "Failed to transcribe file".to_string())?)
 }
 
-pub fn transcribe_speech(audio: &AudioData) -> PyResult<Vec<Word>> {
+fn transcribe_speech(audio: &AudioData, transcribe_model: TranscribeModel) -> PyResult<Vec<Word>> {
     let audio_true_form: Vec<f32> = audio
         .data
         .chunks_exact(2)
@@ -62,6 +85,7 @@ pub fn transcribe_speech(audio: &AudioData) -> PyResult<Vec<Word>> {
             audio_list,
             audio.sample_rate,
             audio.channels,
+            transcribe_model.to_str(),
         ))?;
 
         // Convert Python list of words to Rust Vec<Word>

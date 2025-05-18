@@ -146,6 +146,11 @@ export default function Home() {
       );
 
       unlistenRefs.current.push(unlistenCutProgress);
+
+      await invoke("transcribe", {
+        fileDest: "C:\\Users\\jay_m\\Documents\\Repos\\snipr\\speech-processing\\cut.mp3",
+        transcribeModel: "turbo"
+      })
     };
 
     init();
