@@ -58,8 +58,6 @@ pub async fn decode(
 
     let output_str = String::from_utf8_lossy(&raw_meta_data);
 
-    println!("Output: {}", output_str);
-
     if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
         cancel_cleanup(state);
         return Err("Operation cancelled".to_string());

@@ -24,10 +24,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            setup_menu(&app).unwrap();
+            // setup_menu(&app).unwrap();
 
             let handle = app.handle().clone();
-            println!("before spawn");
             tauri::async_runtime::spawn(async move {
                 update(handle).await.unwrap();
             });
