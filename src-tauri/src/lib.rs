@@ -4,11 +4,12 @@ mod system;
 
 use media_processing::{
     cut::{cancel, cut_silences},
+    downsample::get_samples,
     io::save_file,
     transcribe::transcribe,
 };
 use std::sync::{atomic::AtomicBool, Arc};
-use system::{menu::setup_menu, update::update};
+use system::update::update;
 use tokio::sync::Mutex;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -37,7 +38,8 @@ pub fn run() {
             cut_silences,
             cancel,
             save_file,
-            transcribe
+            transcribe,
+            get_samples
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

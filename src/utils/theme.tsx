@@ -6,7 +6,8 @@ import {
   useState,
 } from "react";
 import { load } from "@tauri-apps/plugin-store";
-import { storage } from "@/utils/settings.ts";
+
+const storage = "store.json";
 
 const key = "theme";
 

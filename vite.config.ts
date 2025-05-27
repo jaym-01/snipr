@@ -20,14 +20,19 @@ export default defineConfig(() => ({
     host: host || false,
     hmr: host
       ? {
-        protocol: "ws",
-        host,
-        port: 1421,
-      }
+          protocol: "ws",
+          host,
+          port: 1421,
+        }
       : undefined,
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
+      ignored: [
+        "**/src-tauri/**",
+        "**/node_modules/**",
+        "**/.venv/**",
+        "**/speech-processing/**",
+      ],
     },
   },
   resolve: {
