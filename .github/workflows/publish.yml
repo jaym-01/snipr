@@ -2,7 +2,7 @@ name: "publish"
 
 on:
   push:
-    branches: 
+    branches:
       - release
 
 jobs:
@@ -14,11 +14,11 @@ jobs:
       matrix:
         include:
           - platform: "windows-latest"
-            args: ''
+            args: ""
     runs-on: ${{matrix.platform}}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: setup deno
         uses: denoland/setup-deno@v2.0.2
 
@@ -28,7 +28,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './src-tauri -> target'
+          workspaces: "./src-tauri -> target"
 
       - name: install frontend dependencies
         run: deno install
@@ -47,7 +47,7 @@ jobs:
           cp "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}/ffmpeg.exe" src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe
           cp "${{ steps.setup-ffmpeg.outputs.ffmpeg-path }}/ffprobe.exe" src-tauri/binaries/ffprobe-x86_64-pc-windows-msvc.exe
           ls src-tauri/binaries/
-      
+
       - uses: tauri-apps/tauri-action@v0
         id: app-build
         env:
@@ -56,12 +56,12 @@ jobs:
         with:
           tauriScript: deno task tauri
           tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseName: "App v__VERSION__"
+          releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-      
+
       - name: Create static json file
         shell: bash
         run: |
@@ -71,9 +71,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.app-build.outputs.appVersion }}
-          repository: jaym-01/snipr-release
           files: |
             D:/a/snipr/snipr/src-tauri/target/release/bundle/**/*
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

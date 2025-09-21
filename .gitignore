@@ -28,3 +28,4 @@ dist-ssr
 binaries
 libraries
 .env
+.venv
