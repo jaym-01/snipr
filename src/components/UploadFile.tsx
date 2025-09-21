@@ -1,11 +1,15 @@
 import { Folder } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 
 const extensionFilters = ["mp3", "wav", "flac"];
 
-export default function UploadFile() {
+export default function UploadFile({
+  handleFileRecieved,
+}: {
+  handleFileRecieved: (filePath: string) => void;
+}) {
   const unlistenRefs = useRef<UnlistenFn[]>([]);
 
   useEffect(() => {
@@ -15,14 +19,12 @@ export default function UploadFile() {
         (event) => {
           const allPaths = event.payload.paths;
           if (
-            allPaths &&
             allPaths.length > 0 &&
             extensionFilters.includes(
               allPaths[0].substring(allPaths[0].length - 3)
             )
           ) {
-            // handle file dropped in
-            // runProcess(event.payload.paths[0]);
+            handleFileRecieved(allPaths[0]);
           }
         }
       );
@@ -32,21 +34,32 @@ export default function UploadFile() {
 
     init();
 
-    invoke("get_samples", {
-      fileDest: "",
-    }).then((result) => {
-      console.log(result);
-    });
-
     return () => {
       unlistenRefs.current.forEach((unlisten) => unlisten());
       unlistenRefs.current = [];
     };
   }, []);
 
+  const handleOpenFile = async () => {
+    const file = await open({
+      multiple: false,
+      filters: [
+        {
+          name: "Audio Files",
+          extensions: extensionFilters,
+        },
+      ],
+    });
+
+    if (file) handleFileRecieved(file);
+  };
+
   return (
-    <div className="flex items-center justify-center h-full flex-row gap-2 font-semibold">
-      <Folder className="inline-block size-7" />
+    <div
+      className="flex-1 flex items-center justify-center gap-2 flex-row h-full font-semibold hover:cursor-pointer hover:scale-105 transition-all duration-200 ease-in-out origin-center"
+      onClick={handleOpenFile}
+    >
+      <Folder className="size-7" />
       Drag in a media file
     </div>
   );

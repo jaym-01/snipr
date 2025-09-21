@@ -11,13 +11,15 @@
     "npm:@tauri-apps/plugin-updater@2.7": "2.7.0",
     "npm:@types/react-dom@^18.3.1": "18.3.5_@types+react@18.3.20",
     "npm:@types/react@^18.3.1": "18.3.20",
+    "npm:@types/wavesurfer.js@^6.0.12": "6.0.12",
     "npm:@vitejs/plugin-react@^4.3.4": "4.3.4_vite@6.2.3_@babel+core@7.26.10",
     "npm:lucide-react@0.483": "0.483.0_react@18.3.1",
     "npm:react-dom@^18.3.1": "18.3.1_react@18.3.1",
     "npm:react@^18.3.1": "18.3.1",
     "npm:tailwindcss@^4.1.7": "4.1.7",
     "npm:typescript@~5.6.2": "5.6.3",
-    "npm:vite@^6.0.3": "6.2.3"
+    "npm:vite@^6.0.3": "6.2.3",
+    "npm:wavesurfer.js@^7.9.5": "7.9.5"
   },
   "npm": {
     "@ampproject/remapping@2.3.0": {
@@ -693,6 +695,9 @@
         "@babel/types"
       ]
     },
+    "@types/debounce@1.2.4": {
+      "integrity": "sha512-jBqiORIzKDOToaF63Fm//haOCHuwQuLa2202RK4MozpA6lh93eCBc+/8+wZn5OzjJt3ySdc+74SXWXB55Ewtyw=="
+    },
     "@types/estree@1.0.6": {
       "integrity": "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw=="
     },
@@ -710,6 +715,12 @@
       "dependencies": [
         "@types/prop-types",
         "csstype"
+      ]
+    },
+    "@types/wavesurfer.js@6.0.12": {
+      "integrity": "sha512-oM9hYlPIVms4uwwoaGs9d0qp7Xk7IjSGkdwgmhUymVUIIilRfjtSQvoOgv4dpKiW0UozWRSyXfQqTobi0qWyCw==",
+      "dependencies": [
+        "@types/debounce"
       ]
     },
     "@vitejs/plugin-react@4.3.4_vite@6.2.3_@babel+core@7.26.10": {
@@ -1060,6 +1071,9 @@
       ],
       "bin": true
     },
+    "wavesurfer.js@7.9.5": {
+      "integrity": "sha512-ioOG9chuAn0bF2NYYKkZtaxjcQK/hFskLg8ViLYbJHhWPk1N5wWtuqVhqeh2ZWT2SK3t0E8UkD7lLDLuZQQaSA=="
+    },
     "yallist@3.1.1": {
       "integrity": "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="
     },
@@ -1080,13 +1094,15 @@
         "npm:@tauri-apps/plugin-updater@2.7",
         "npm:@types/react-dom@^18.3.1",
         "npm:@types/react@^18.3.1",
+        "npm:@types/wavesurfer.js@^6.0.12",
         "npm:@vitejs/plugin-react@^4.3.4",
         "npm:lucide-react@0.483",
         "npm:react-dom@^18.3.1",
         "npm:react@^18.3.1",
         "npm:tailwindcss@^4.1.7",
         "npm:typescript@~5.6.2",
-        "npm:vite@^6.0.3"
+        "npm:vite@^6.0.3",
+        "npm:wavesurfer.js@^7.9.5"
       ]
     }
   }

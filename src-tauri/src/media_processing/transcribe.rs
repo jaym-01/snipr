@@ -1,5 +1,3 @@
-use crate::media_processing::io::decode;
-use crate::models;
 use crate::models::AudioData;
 use pyo3::ffi::c_str;
 use pyo3::prelude::*;
@@ -26,28 +24,6 @@ impl TranscribeModel {
             TranscribeModel::Turbo => "turbo",
         }
     }
-}
-
-#[tauri::command]
-pub async fn transcribe(
-    app_handle: tauri::AppHandle,
-    state: models::AppState<'_>,
-    file_dest: String,
-    transcribe_model: Option<String>,
-) -> Result<Vec<Word>, String> {
-    let audio = decode(&app_handle, &state, &file_dest)
-        .await
-        .map_err(|_| "Failed to decode file".to_string())?;
-
-    let tmodel = match transcribe_model {
-        None => TranscribeModel::Tiny,
-        Some(model) => match model.as_str() {
-            "turbo" => TranscribeModel::Turbo,
-            _ => TranscribeModel::Tiny,
-        },
-    };
-
-    Ok(transcribe_speech(&audio, tmodel).map_err(|_| "Failed to transcribe file".to_string())?)
 }
 
 fn transcribe_speech(audio: &AudioData, transcribe_model: TranscribeModel) -> PyResult<Vec<Word>> {

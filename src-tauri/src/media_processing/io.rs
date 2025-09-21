@@ -1,43 +1,12 @@
-use super::progress::send_progress;
-use crate::models::{self, AppState};
+use crate::models::{self};
 use crate::system::sidecar::run_side_car;
+use std::time::SystemTime;
 use tauri_plugin_shell::ShellExt;
-
-#[tauri::command]
-pub async fn save_file(
-    app_handle: tauri::AppHandle,
-    state: models::AppState<'_>,
-    file_dest: String,
-) -> Result<(), String> {
-    let l_audio_data = state.audio_data.lock().await;
-    if l_audio_data.is_none() {
-        Err("No audio data to save".to_string())
-    } else {
-        encode(app_handle, l_audio_data.as_ref().unwrap(), &file_dest)
-            .await
-            .map_err(|_| "Failed to saved file".to_string())?;
-        Ok(())
-    }
-}
-
-pub fn cancel_cleanup(state: &AppState<'_>) {
-    state
-        .cancelled
-        .store(false, std::sync::atomic::Ordering::Relaxed);
-}
 
 pub async fn decode(
     app_handle: &tauri::AppHandle,
-    state: &AppState<'_>,
     input_file: &str,
 ) -> Result<models::AudioData, String> {
-    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup(state);
-        return Err("Operation cancelled".to_string());
-    }
-
-    send_progress(&app_handle, 5);
-
     // get meta data - the channels + sample rate
     let raw_meta_data = run_side_car(
         &app_handle,
@@ -54,14 +23,7 @@ pub async fn decode(
     )
     .await?;
 
-    send_progress(&app_handle, 10);
-
     let output_str = String::from_utf8_lossy(&raw_meta_data);
-
-    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup(state);
-        return Err("Operation cancelled".to_string());
-    }
 
     let channels = output_str
         .lines()
@@ -70,7 +32,7 @@ pub async fn decode(
         .split('=')
         .last()
         .unwrap()
-        .parse::<u8>()
+        .parse::<usize>()
         .unwrap();
 
     let sample_rate = output_str
@@ -80,15 +42,10 @@ pub async fn decode(
         .split('=')
         .nth(1)
         .unwrap()
-        .parse::<u32>()
+        .parse::<usize>()
         .unwrap();
 
-    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup(state);
-        return Err("Operation cancelled".to_string());
-    }
-
-    send_progress(&app_handle, 15);
+    let start = SystemTime::now();
 
     // extract the audio samples from the mp3 file
     let data: Vec<u8> = run_side_car(
@@ -98,12 +55,10 @@ pub async fn decode(
     )
     .await?;
 
-    send_progress(&app_handle, 30);
-
-    if state.cancelled.load(std::sync::atomic::Ordering::Relaxed) {
-        cancel_cleanup(state);
-        return Err("Operation cancelled".to_string());
-    }
+    println!(
+        "time taken {:?}",
+        start.elapsed().expect("Failed to get elapsed time")
+    );
 
     Ok(models::AudioData {
         channels: channels,

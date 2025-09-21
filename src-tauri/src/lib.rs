@@ -2,12 +2,7 @@ mod media_processing;
 mod models;
 mod system;
 
-use media_processing::{
-    cut::{cancel, cut_silences},
-    downsample::get_samples,
-    io::save_file,
-    transcribe::transcribe,
-};
+use media_processing::downsample::get_audio;
 use std::sync::{atomic::AtomicBool, Arc};
 use system::update::update;
 use tokio::sync::Mutex;
@@ -34,13 +29,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            cut_silences,
-            cancel,
-            save_file,
-            transcribe,
-            get_samples
-        ])
+        .invoke_handler(tauri::generate_handler![get_audio])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

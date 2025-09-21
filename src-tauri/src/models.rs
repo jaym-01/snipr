@@ -11,7 +11,7 @@ pub struct CutState {
 }
 
 pub struct AudioData {
-    pub channels: u8,
-    pub sample_rate: u32,
+    pub channels: usize,
+    pub sample_rate: usize,
     pub data: Vec<u8>,
 }
