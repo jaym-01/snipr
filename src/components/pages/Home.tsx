@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <main className="flex h-full">
       {media.length == 0 ? (
-        <UploadFile handleFileRecieved={handleFileRecieved} />
+        <UploadFile />
       ) : (
         <div className="flex-1 flex flex-col">
           {media.map((audio, index) => (

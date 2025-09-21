@@ -2,14 +2,11 @@ import { Folder } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
+import { invoke } from "@tauri-apps/api/core";
 
 const extensionFilters = ["mp3", "wav", "flac"];
 
-export default function UploadFile({
-  handleFileRecieved,
-}: {
-  handleFileRecieved: (filePath: string) => void;
-}) {
+export default function UploadFilePage() {
   const unlistenRefs = useRef<UnlistenFn[]>([]);
 
   useEffect(() => {
@@ -55,12 +52,18 @@ export default function UploadFile({
   };
 
   return (
-    <div
-      className="flex-1 flex items-center justify-center gap-2 flex-row h-full font-semibold hover:cursor-pointer hover:scale-105 transition-all duration-200 ease-in-out origin-center"
-      onClick={handleOpenFile}
-    >
-      <Folder className="size-7" />
-      Drag in a media file
+    <div className="group flex-1 h-full w-full flex justify-center items-center hover:cursor-pointer">
+      <div
+        className="w-fit flex gap-2 flex-row items-center font-bold text-3xl group-hover:scale-105 transition-all duration-200 ease-in-out origin-center"
+        onClick={handleOpenFile}
+      >
+        <Folder className="size-12" />
+        Drag in a media file
+      </div>
     </div>
   );
+}
+
+async function handleFileRecieved(filePath: string) {
+  await invoke("get_audio", { fileDest: filePath });
 }
